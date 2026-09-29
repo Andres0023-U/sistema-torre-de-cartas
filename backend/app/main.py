@@ -3,8 +3,12 @@ from sqlalchemy.orm import Session
 from sqlalchemy import text
 from app.core.database import get_db
 from app.models.security import Role
+from app.api.v1.auth import router as auth_router
 
 app = FastAPI(title="Torre de Cartas API")
+
+app.include_router(auth_router)
+
 
 @app.get("/")
 def read_root():
