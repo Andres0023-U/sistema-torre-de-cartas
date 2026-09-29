@@ -3,9 +3,9 @@
 -- Creación de schemas
 -- =========================================================
 
-CREATE SCHEMA IF NOT EXISTS seguridad;
-CREATE SCHEMA IF NOT EXISTS jugadores;
-CREATE SCHEMA IF NOT EXISTS torneos;
-CREATE SCHEMA IF NOT EXISTS cartas;
-CREATE SCHEMA IF NOT EXISTS partidas;
-CREATE SCHEMA IF NOT EXISTS auditoria;
+CREATE SCHEMA IF NOT EXISTS security;
+CREATE SCHEMA IF NOT EXISTS players;
+CREATE SCHEMA IF NOT EXISTS tournaments;
+CREATE SCHEMA IF NOT EXISTS cards;
+CREATE SCHEMA IF NOT EXISTS matches;
+CREATE SCHEMA IF NOT EXISTS audit;
