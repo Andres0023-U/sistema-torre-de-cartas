@@ -32,3 +32,10 @@ def get_current_user_payload(credentials: HTTPAuthorizationCredentials = Depends
         return payload
     except JWTError:
         raise HTTPException(status_code=401, detail="Token inválido o expirado")
+
+def require_role(allowed_roles: list[str]):
+    def role_checker(payload: dict = Depends(get_current_user_payload)):
+        if payload.get("role") not in allowed_roles:
+            raise HTTPException(status_code=403, detail="No tienes permiso para esta acción")
+        return payload
+    return role_checker

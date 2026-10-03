@@ -5,6 +5,7 @@ from sqlalchemy import text
 from app.core.database import get_db
 from app.models.security import Role
 from app.api.v1.auth import router as auth_router
+from app.api.v1.tournaments import router as tournaments_router
 
 app = FastAPI(title="Torre de Cartas API")
 
@@ -17,6 +18,7 @@ app.add_middleware(
 )
 
 app.include_router(auth_router)
+app.include_router(tournaments_router)
 
 @app.get("/")
 def read_root():

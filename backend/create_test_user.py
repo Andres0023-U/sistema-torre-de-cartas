@@ -4,17 +4,17 @@ from app.models.security import User
 
 db = SessionLocal()
 
-test_user = User(
-    name="Usuario Prueba",
-    email="prueba@test.com",
+organizer = User(
+    name="Organizador Prueba",
+    email="organizador@test.com",
     password_hash=hash_password("123456"),
-    role_id=6,  # el ID de 'player' que viste en /test-models — ajústalo si quieres otro rol
+    role_id=5,  # el ID de 'organizer' que viste antes
 )
 
-db.add(test_user)
+db.add(organizer)
 db.commit()
-db.refresh(test_user)
+db.refresh(organizer)
 
-print(f"Usuario creado: id={test_user.user_id}, email={test_user.email}")
+print(f"Usuario creado: id={organizer.user_id}, email={organizer.email}")
 
 db.close()
