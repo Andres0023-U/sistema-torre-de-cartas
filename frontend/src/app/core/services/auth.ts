@@ -37,4 +37,8 @@ export class AuthService {
   isLoggedIn(): boolean {
     return !!this.getToken();
   }
+
+  getCurrentUser(): Observable<any> {
+    return this.http.get(`${this.apiUrl}/me`);
+  }
 }
