@@ -1,9 +1,16 @@
 export interface Tournament {
-  id: number;
+  tournamentId: number;
   name: string;
   date: string;
-  format: 'single_elimination';
-  numParticipants: 4 | 8 | 16 | 32;
+  format: string;
+  numPlayers: number;
   status: 'pending' | 'in_progress' | 'finished';
   organizerId: number;
+}
+
+export interface TournamentCreate {
+  name: string;
+  date: string;
+  format: string;
+  numPlayers: number;
 }

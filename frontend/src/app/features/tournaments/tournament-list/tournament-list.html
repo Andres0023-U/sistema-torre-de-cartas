@@ -1,0 +1,41 @@
+<div class="p-6">
+  <h1 class="text-2xl font-bold mb-4">Torneos</h1>
+
+  <form (ngSubmit)="onCreate()" class="bg-white p-4 rounded shadow mb-6 max-w-md">
+    <h2 class="font-semibold mb-2">Crear torneo</h2>
+
+    <input [(ngModel)]="name" name="name" placeholder="Nombre" required
+      class="w-full border rounded px-3 py-2 mb-2">
+
+    <input [(ngModel)]="date" name="date" type="date" required
+      class="w-full border rounded px-3 py-2 mb-2">
+
+    <select [(ngModel)]="numPlayers" name="numPlayers"
+      class="w-full border rounded px-3 py-2 mb-2">
+      <option [value]="4">4 jugadores</option>
+      <option [value]="8">8 jugadores</option>
+      <option [value]="16">16 jugadores</option>
+      <option [value]="32">32 jugadores</option>
+    </select>
+
+    @if (successMessage) {
+    <p class="text-green-600 text-sm mb-2">{{ successMessage }}</p>
+    }
+    @if (errorMessage) {
+    <p class="text-red-600 text-sm mb-2">{{ errorMessage }}</p>
+    }
+
+    <button type="submit" class="bg-slate-900 text-white px-4 py-2 rounded">
+      Crear
+    </button>
+  </form>
+
+  <div class="grid gap-3">
+    @for (t of tournaments; track t.tournamentId) {
+      <div class="bg-white p-4 rounded shadow">
+        <p class="font-semibold">{{ t.name }}</p>
+        <p class="text-sm text-slate-600">{{ t.date }} · {{ t.numPlayers }} jugadores · {{ t.status }}</p>
+      </div>
+    }
+  </div>
+</div>
