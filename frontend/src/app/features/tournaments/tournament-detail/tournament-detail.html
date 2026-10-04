@@ -1,0 +1,48 @@
+<div class="p-6">
+  @if (tournament) {
+    <h1 class="text-2xl font-bold mb-1">{{ tournament.name }}</h1>
+    <p class="text-sm text-slate-600 mb-4">
+      {{ tournament.date }} · {{ registeredIds.length }} / {{ tournament.numPlayers }} jugadores · {{ tournament.status }}
+    </p>
+
+    @if (successMessage) {
+      <p class="text-green-600 text-sm mb-2">{{ successMessage }}</p>
+    }
+    @if (errorMessage) {
+      <p class="text-red-600 text-sm mb-2">{{ errorMessage }}</p>
+    }
+
+    @if (tournament.status === 'pending') {
+      <div class="bg-white p-4 rounded shadow mb-4 max-w-lg">
+        <h2 class="font-semibold mb-3">Jugadores disponibles</h2>
+        @for (p of availablePlayers; track p.playerId) {
+          <div class="flex items-center justify-between border-b py-2 last:border-0">
+            <span>{{ p.name }} <span class="text-slate-500 text-sm">({{ p.email }})</span></span>
+            <button
+              (click)="onRegister(p.playerId)"
+              class="bg-slate-900 text-white text-sm px-3 py-1 rounded"
+            >
+              Inscribir
+            </button>
+          </div>
+        }
+        @if (availablePlayers.length === 0) {
+          <p class="text-slate-500 text-sm">No hay más jugadores disponibles.</p>
+        }
+      </div>
+
+      @if (registeredIds.length === tournament.numPlayers) {
+        <button
+          (click)="onStart()"
+          class="bg-green-700 text-white px-4 py-2 rounded"
+        >
+          Iniciar torneo
+        </button>
+      }
+    }
+
+    @if (tournament.status !== 'pending') {
+      <p class="text-slate-700">Este torneo ya está {{ tournament.status === 'in_progress' ? 'en curso' : 'finalizado' }}.</p>
+    }
+  }
+</div>

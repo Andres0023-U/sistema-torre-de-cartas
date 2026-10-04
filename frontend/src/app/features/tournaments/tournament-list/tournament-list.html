@@ -12,10 +12,10 @@
 
     <select [(ngModel)]="numPlayers" name="numPlayers"
       class="w-full border rounded px-3 py-2 mb-2">
-      <option [value]="4">4 jugadores</option>
-      <option [value]="8">8 jugadores</option>
-      <option [value]="16">16 jugadores</option>
-      <option [value]="32">32 jugadores</option>
+      <option [ngValue]="4">4 jugadores</option>
+      <option [ngValue]="8">8 jugadores</option>
+      <option [ngValue]="16">16 jugadores</option>
+      <option [ngValue]="32">32 jugadores</option>
     </select>
 
     @if (successMessage) {
@@ -32,10 +32,10 @@
 
   <div class="grid gap-3">
     @for (t of tournaments; track t.tournamentId) {
-      <div class="bg-white p-4 rounded shadow">
+      <a [routerLink]="['/tournaments', t.tournamentId]" class="block bg-white p-4 rounded shadow hover:bg-slate-50">
         <p class="font-semibold">{{ t.name }}</p>
         <p class="text-sm text-slate-600">{{ t.date }} · {{ t.numPlayers }} jugadores · {{ t.status }}</p>
-      </div>
+      </a>
     }
   </div>
 </div>

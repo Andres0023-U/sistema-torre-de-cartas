@@ -14,3 +14,23 @@ export interface TournamentCreate {
   format: string;
   numPlayers: number;
 }
+
+export interface Registration {
+  tournamentRegistrationId: number;
+  tournamentId: number;
+  playerId: number;
+}
+
+export interface Round {
+  roundId: number;
+  tournamentId: number;
+  number: number;
+  name: string;
+  status: string;
+}
+
+export interface StartTournamentResponse {
+  tournamentId: number;
+  status: string;
+  roundId: number;
+}

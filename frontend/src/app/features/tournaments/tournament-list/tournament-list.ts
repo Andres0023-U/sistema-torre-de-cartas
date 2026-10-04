@@ -2,10 +2,11 @@ import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { TournamentService } from '../../../core/services/tournament';
 import { Tournament } from '../../../models/tournament.model';
+import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-tournament-list',
-  imports: [FormsModule],
+  imports: [FormsModule, RouterLink],
   templateUrl: './tournament-list.html',
   styleUrl: './tournament-list.css'
 })

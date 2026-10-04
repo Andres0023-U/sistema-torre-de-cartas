@@ -37,8 +37,23 @@ export class TournamentService {
       format: data.format,
       num_players: data.numPlayers
     };
+
     return this.http.post<any>(`${this.apiUrl}/`, body).pipe(
       map(t => this.mapTournament(t))
     );
+  }
+
+  getRegisteredPlayers(tournamentId: number): Observable<number[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/${tournamentId}/registrations`).pipe(
+      map(list => list.map(r => r.player_id))
+    );
+  }
+
+  registerPlayer(tournamentId: number, playerId: number): Observable<any> {
+    return this.http.post(`${this.apiUrl}/${tournamentId}/registrations`, { player_id: playerId });
+  }
+
+  startTournament(tournamentId: number): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/${tournamentId}/start`, {});
   }
 }
