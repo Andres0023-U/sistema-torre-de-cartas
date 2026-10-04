@@ -10,6 +10,7 @@ from app.api.v1.players import router as players_router
 from app.api.v1.decks import router as decks_router
 from app.api.v1.round_deck_selections import router as round_deck_router
 from app.api.v1.matches import router as matches_router
+from app.api.v1.cards import router as cards_router
 
 app = FastAPI(title="Torre de Cartas API")
 
@@ -30,6 +31,7 @@ app.include_router(players_router)
 app.include_router(decks_router)
 app.include_router(round_deck_router)
 app.include_router(matches_router)
+app.include_router(cards_router)
 
 
 @app.get("/")

@@ -34,3 +34,23 @@ def get_my_player(
     if not player:
         raise HTTPException(status_code=404, detail="No tienes perfil de jugador todavía")
     return player
+
+from app.core.security import require_role
+from app.models.security import User
+from app.schemas.player import PlayerWithUserResponse
+
+@router.get("/", response_model=list[PlayerWithUserResponse])
+def list_players(
+    db: Session = Depends(get_db),
+    payload: dict = Depends(require_role(["organizer"]))
+):
+    results = db.query(Player, User).join(User, Player.user_id == User.user_id).all()
+    return [
+        PlayerWithUserResponse(
+            player_id=player.player_id,
+            user_id=player.user_id,
+            name=user.name,
+            email=user.email
+        )
+        for player, user in results
+    ]

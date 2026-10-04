@@ -209,3 +209,14 @@ def next_round(
         "round_status": "pending",
         "players": [{"player_id": s.player_id, "deck_id": s.deck_id} for s in selections],
     }
+
+from app.models.tournaments import Round
+from app.schemas.tournament import RoundResponse
+
+@router.get("/{tournament_id}/rounds", response_model=list[RoundResponse])
+def list_rounds(
+    tournament_id: int,
+    db: Session = Depends(get_db),
+    payload: dict = Depends(get_current_user_payload)
+):
+    return db.query(Round).filter(Round.tournament_id == tournament_id).all()

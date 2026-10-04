@@ -19,3 +19,13 @@ class TournamentResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+class RoundResponse(BaseModel):
+    round_id: int
+    tournament_id: int
+    number: int
+    name: str
+    status: str
+
+    class Config:
+        from_attributes = True
