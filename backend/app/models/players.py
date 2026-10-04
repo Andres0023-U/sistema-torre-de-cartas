@@ -27,3 +27,4 @@ class DeckCard(Base):
 
     deck_id = Column(Integer, ForeignKey("players.deck.deck_id"), primary_key=True)
     card_id = Column(Integer, ForeignKey("cards.card.card_id"), primary_key=True)
+    quantity = Column(Integer, nullable=False, default=1)

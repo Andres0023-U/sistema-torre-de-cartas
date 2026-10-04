@@ -7,6 +7,8 @@ from app.models.security import Role
 from app.api.v1.auth import router as auth_router
 from app.api.v1.tournaments import router as tournaments_router
 from app.api.v1.players import router as players_router
+from app.api.v1.decks import router as decks_router
+from app.api.v1.round_deck_selections import router as round_deck_router
 
 app = FastAPI(title="Torre de Cartas API")
 
@@ -21,6 +23,9 @@ app.add_middleware(
 app.include_router(auth_router)
 app.include_router(tournaments_router)
 app.include_router(players_router)
+app.include_router(decks_router)
+app.include_router(round_deck_router)
+
 
 @app.get("/")
 def read_root():
