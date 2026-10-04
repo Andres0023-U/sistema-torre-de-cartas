@@ -93,3 +93,59 @@ def list_deck_cards(
     player = get_player_or_404(int(payload["sub"]), db)
     get_my_deck_or_404(deck_id, player, db)
     return db.query(DeckCard).filter(DeckCard.deck_id == deck_id).all()
+
+from app.schemas.deck_card import DeckCardCreate, DeckCardResponse
+
+@router.put("/{deck_id}/cards/{card_id}", response_model=DeckCardResponse)
+def update_card_quantity(
+    deck_id: int,
+    card_id: int,
+    data: DeckCardCreate,
+    db: Session = Depends(get_db),
+    payload: dict = Depends(get_current_user_payload)
+):
+    player = get_player_or_404(int(payload["sub"]), db)
+    deck = get_my_deck_or_404(deck_id, player, db)
+
+    card = db.query(Card).filter(Card.card_id == card_id).first()
+    if not card:
+        raise HTTPException(status_code=404, detail="Carta no encontrada")
+
+    if data.quantity > card.max_quantity:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Máximo {card.max_quantity} copias de '{card.card_name}' por mazo"
+        )
+
+    deck_card = db.query(DeckCard).filter(
+        DeckCard.deck_id == deck_id,
+        DeckCard.card_id == card_id
+    ).first()
+    if not deck_card:
+        raise HTTPException(status_code=404, detail="Esa carta no está en el mazo")
+
+    deck_card.quantity = data.quantity
+    db.commit()
+    db.refresh(deck_card)
+    return deck_card
+
+
+@router.delete("/{deck_id}/cards/{card_id}", status_code=204)
+def remove_card_from_deck(
+    deck_id: int,
+    card_id: int,
+    db: Session = Depends(get_db),
+    payload: dict = Depends(get_current_user_payload)
+):
+    player = get_player_or_404(int(payload["sub"]), db)
+    deck = get_my_deck_or_404(deck_id, player, db)
+
+    deck_card = db.query(DeckCard).filter(
+        DeckCard.deck_id == deck_id,
+        DeckCard.card_id == card_id
+    ).first()
+    if not deck_card:
+        raise HTTPException(status_code=404, detail="Esa carta no está en el mazo")
+
+    db.delete(deck_card)
+    db.commit()
