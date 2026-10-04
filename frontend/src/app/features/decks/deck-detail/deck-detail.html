@@ -1,0 +1,58 @@
+<div class="p-6">
+  @if (deck) {
+    <h1 class="text-2xl font-bold mb-1">{{ deck.name }}</h1>
+    <p class="text-sm mb-4" [class.text-green-600]="totalCards >= 20" [class.text-slate-600]="totalCards < 20">
+      {{ totalCards }} / 20 cartas
+    </p>
+
+    @if (successMessage) {
+      <p class="text-green-600 text-sm mb-2">{{ successMessage }}</p>
+    }
+    @if (errorMessage) {
+      <p class="text-red-600 text-sm mb-2">{{ errorMessage }}</p>
+    }
+
+    <div class="grid gap-2 max-w-2xl">
+      @for (c of allCards; track c.cardId) {
+        <div class="bg-white p-3 rounded shadow flex items-center justify-between">
+          <div>
+            <p class="font-semibold">{{ c.cardName }} <span class="text-xs text-slate-500">({{ c.rarity }})</span></p>
+            <p class="text-sm text-slate-600">{{ c.type }} · valor {{ c.value }} · máx {{ c.maxQuantity }}</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-sm text-slate-700">{{ getQuantity(c.cardId) }} / {{ c.maxQuantity }}</span>
+            <input
+              type="number"
+              [min]="1"
+              [max]="c.maxQuantity"
+              [value]="getQuantity(c.cardId) || 1"
+              #qtyInput
+              class="w-16 border rounded px-2 py-1 text-sm"
+            >
+            @if (getQuantity(c.cardId) > 0) {
+              <button
+                (click)="onUpdateQuantity(c.cardId, qtyInput.value)"
+                class="bg-slate-700 text-white text-sm px-3 py-1 rounded"
+              >
+                Actualizar
+              </button>
+              <button
+                (click)="onRemoveCard(c.cardId)"
+                class="bg-red-600 text-white text-sm px-3 py-1 rounded"
+              >
+                Quitar
+              </button>
+            } @else {
+              <button
+                (click)="onAddCard(c.cardId, qtyInput.value)"
+                class="bg-slate-900 text-white text-sm px-3 py-1 rounded"
+              >
+                Agregar
+              </button>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>
