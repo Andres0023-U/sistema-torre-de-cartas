@@ -32,3 +32,32 @@ def list_tournaments(
     payload: dict = Depends(get_current_user_payload)
 ):
     return db.query(Tournament).all()
+
+from app.models.tournaments import TournamentRegistration
+from app.schemas.tournament_registration import RegistrationCreate, RegistrationResponse
+
+@router.post("/{tournament_id}/registrations", response_model=RegistrationResponse)
+def register_player(
+    tournament_id: int,
+    data: RegistrationCreate,
+    db: Session = Depends(get_db),
+    payload: dict = Depends(require_role(["organizer"]))
+):
+    registration = TournamentRegistration(
+        tournament_id=tournament_id,
+        player_id=data.player_id
+    )
+    db.add(registration)
+    db.commit()
+    db.refresh(registration)
+    return registration
+
+@router.get("/{tournament_id}/registrations", response_model=list[RegistrationResponse])
+def list_registrations(
+    tournament_id: int,
+    db: Session = Depends(get_db),
+    payload: dict = Depends(get_current_user_payload)
+):
+    return db.query(TournamentRegistration).filter(
+        TournamentRegistration.tournament_id == tournament_id
+    ).all()
