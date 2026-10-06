@@ -10,56 +10,134 @@
       </h1>
     </div>
 
-    <form (ngSubmit)="onSubmit()" class="bg-white p-8 rounded-xl shadow-sm border border-slate-200 relative">
-      <div class="absolute left-0 top-0 h-full w-1 rounded-l-xl" style="background:#c9a227"></div>
+    <form (ngSubmit)="onSubmit()" class="bg-white p-8 rounded-xl shadow-sm border border-slate-200 relative overflow-hidden">
+      <div class="absolute left-0 top-0 h-full w-1" style="background:#c9a227"></div>
 
       <h2 class="text-lg mb-6" style="font-family:'Cinzel',serif; font-weight:600; color:#0f172a">
         Crear cuenta
       </h2>
 
-      <label class="block mb-2 text-sm text-slate-600">Nombre</label>
-      <input
-        type="text"
-        [(ngModel)]="name"
-        name="name"
-        maxlength="20"
-        class="w-full border border-slate-300 rounded-lg px-3 py-2 mb-4 outline-none focus:border-[#c9a227] transition-colors"
-        required
-      >
+      <!-- Nombre -->
+      <div class="mb-5">
+        <label
+          class="block mb-2 text-sm font-medium"
+          [class.text-slate-600]="!nameError"
+          [class.text-red-700]="nameError">
+          Nombre
+          @if (nameError) {
+            <span class="text-red-600"> *</span>
+          }
+        </label>
 
-      <label class="block mb-2 text-sm text-slate-600">Correo</label>
-      <input
-        type="email"
-        [(ngModel)]="email"
-        name="email"
-        class="w-full border border-slate-300 rounded-lg px-3 py-2 mb-4 outline-none focus:border-[#c9a227] transition-colors"
-        required
-      >
+        <input
+          type="text"
+          [(ngModel)]="name"
+          name="name"
+          maxlength="20"
+          [attr.aria-invalid]="!!nameError"
+          [style.border-color]="nameError ? '#f87171' : null"
+          [style.background]="nameError ? '#fef2f2' : null"
+          class="w-full border border-slate-300 rounded-lg px-4 py-3
+                 outline-none bg-slate-50
+                 focus:bg-white focus:border-[#c9a227]
+                 focus:ring-1 focus:ring-[#c9a227]
+                 transition-all duration-200"
+        >
 
-      <label class="block mb-2 text-sm text-slate-600">Contraseña</label>
-      <input
-        type="password"
-        [(ngModel)]="password"
-        name="password"
-        class="w-full border border-slate-300 rounded-lg px-3 py-2 mb-1 outline-none focus:border-[#c9a227] transition-colors"
-        required
-      >
-      <p class="text-xs text-slate-400 mb-4">Mínimo 8 caracteres, con al menos una letra y un número.</p>
+        @if (nameError) {
+          <p class="mt-2 text-xs text-red-600">{{ nameError }}</p>
+        } @else {
+          <p class="mt-2 text-xs text-slate-400">Máximo 20 caracteres.</p>
+        }
+      </div>
 
+      <!-- Correo -->
+      <div class="mb-5">
+        <label
+          class="block mb-2 text-sm font-medium"
+          [class.text-slate-600]="!emailError"
+          [class.text-red-700]="emailError">
+          Correo electrónico
+          @if (emailError) {
+            <span class="text-red-600"> *</span>
+          }
+        </label>
+
+        <input
+          type="email"
+          [(ngModel)]="email"
+          name="email"
+          placeholder="correo@ejemplo.com"
+          [attr.aria-invalid]="!!emailError"
+          [style.border-color]="emailError ? '#f87171' : null"
+          [style.background]="emailError ? '#fef2f2' : null"
+          class="w-full border border-slate-300 rounded-lg px-4 py-3
+                 outline-none bg-slate-50
+                 focus:bg-white focus:border-[#c9a227]
+                 focus:ring-1 focus:ring-[#c9a227]
+                 transition-all duration-200"
+        >
+
+        @if (emailError) {
+          <p class="mt-2 text-xs text-red-600">{{ emailError }}</p>
+        }
+      </div>
+
+      <!-- Contraseña -->
+      <div class="mb-5">
+        <label
+          class="block mb-2 text-sm font-medium"
+          [class.text-slate-600]="!passwordError"
+          [class.text-red-700]="passwordError">
+          Contraseña
+          @if (passwordError) {
+            <span class="text-red-600"> *</span>
+          }
+        </label>
+
+        <input
+          type="password"
+          [(ngModel)]="password"
+          name="password"
+          placeholder="••••••••"
+          [attr.aria-invalid]="!!passwordError"
+          [style.border-color]="passwordError ? '#f87171' : null"
+          [style.background]="passwordError ? '#fef2f2' : null"
+          class="w-full border border-slate-300 rounded-lg px-4 py-3
+                 outline-none bg-slate-50
+                 focus:bg-white focus:border-[#c9a227]
+                 focus:ring-1 focus:ring-[#c9a227]
+                 transition-all duration-200"
+        >
+
+        @if (passwordError) {
+          <p class="mt-2 text-xs text-red-600">{{ passwordError }}</p>
+        } @else {
+          <p class="mt-2 text-xs text-slate-400">
+            Mínimo 8 caracteres, con al menos una letra y un número.
+          </p>
+        }
+      </div>
+
+      <!-- Error del servidor -->
       @if (errorMessage) {
-        <p class="text-red-700 text-sm mb-4">{{ errorMessage }}</p>
+        <div class="mb-5 px-4 py-3 rounded-lg bg-red-50 border border-red-200">
+          <p class="text-red-700 text-sm">{{ errorMessage }}</p>
+        </div>
       }
 
       <button
         type="submit"
-        class="w-full text-white py-2.5 rounded-lg transition-colors"
-        style="background:#0f172a"
-      >
+        class="w-full text-white py-3 rounded-lg font-medium
+               transition-all duration-200 hover:opacity-90 hover:shadow-md
+               active:scale-[0.99]"
+        style="background:#0f172a">
         Crear cuenta
       </button>
 
-      <p class="text-center text-sm text-slate-500 mt-5">
-        ¿Ya tienes cuenta? <a routerLink="/login" class="font-medium" style="color:#b08a18">Inicia sesión</a>
+      <p class="text-center text-sm text-slate-500 mt-6">
+        ¿Ya tienes cuenta?
+        <a routerLink="/login" class="font-medium hover:underline" style="color:#b08a18">Inicia sesión</a>
       </p>
     </form>
 

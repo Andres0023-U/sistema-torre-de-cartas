@@ -10,6 +10,7 @@ import { DeckDetail } from './features/decks/deck-detail/deck-detail';
 import { RoundDetail } from './features/tournaments/round-detail/round-detail';
 import { Register } from './features/auth/register/register';
 import { AdminPanel } from './features/admin/admin-panel/admin-panel';
+import { playerGuard } from './core/guards/player-guard';
 
 export const routes: Routes = [
   { path: 'login', component: Login },
@@ -20,5 +21,7 @@ export const routes: Routes = [
   { path: 'tournaments/:id/rounds/:roundId', component: RoundDetail, canActivate: [authGuard] },
   { path: 'decks', component: DeckList, canActivate: [authGuard] },
   { path: 'decks/:id', component: DeckDetail, canActivate: [authGuard] },
-  { path: 'admin', component: AdminPanel, canActivate: [adminGuard] }
+  { path: 'admin', component: AdminPanel, canActivate: [adminGuard] },
+  { path: 'decks', component: DeckList, canActivate: [authGuard, playerGuard] },
+  { path: 'decks/:id', component: DeckDetail, canActivate: [authGuard, playerGuard] },
 ];

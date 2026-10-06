@@ -44,8 +44,14 @@
 
       <!-- Correo -->
       <div class="mb-5">
-        <label class="block mb-2 text-sm font-medium text-slate-600">
+        <label
+          class="block mb-2 text-sm font-medium"
+          [class.text-slate-600]="!emailMissing"
+          [class.text-red-700]="emailMissing">
           Correo electrónico
+          @if (emailMissing) {
+            <span class="text-red-600"> *</span>
+          }
         </label>
 
         <input
@@ -53,20 +59,32 @@
           [(ngModel)]="email"
           name="email"
           placeholder="correo@ejemplo.com"
+          [attr.aria-invalid]="emailMissing"
+          [style.border-color]="emailMissing ? '#f87171' : null"
+          [style.background]="emailMissing ? '#fef2f2' : null"
           class="w-full border border-slate-300 rounded-lg px-4 py-3
                 outline-none bg-slate-50
                 focus:bg-white focus:border-[#c9a227]
                 focus:ring-1 focus:ring-[#c9a227]
                 transition-all duration-200"
-          required
         >
+
+        @if (emailMissing) {
+          <p class="mt-2 text-xs text-red-600">Este campo es obligatorio</p>
+        }
       </div>
 
 
       <!-- Contraseña -->
       <div class="mb-5">
-        <label class="block mb-2 text-sm font-medium text-slate-600">
+        <label
+          class="block mb-2 text-sm font-medium"
+          [class.text-slate-600]="!passwordMissing"
+          [class.text-red-700]="passwordMissing">
           Contraseña
+          @if (passwordMissing) {
+            <span class="text-red-600"> *</span>
+          }
         </label>
 
         <input
@@ -74,13 +92,19 @@
           [(ngModel)]="password"
           name="password"
           placeholder="••••••••"
+          [attr.aria-invalid]="passwordMissing"
+          [style.border-color]="passwordMissing ? '#f87171' : null"
+          [style.background]="passwordMissing ? '#fef2f2' : null"
           class="w-full border border-slate-300 rounded-lg px-4 py-3
                 outline-none bg-slate-50
                 focus:bg-white focus:border-[#c9a227]
                 focus:ring-1 focus:ring-[#c9a227]
                 transition-all duration-200"
-          required
         >
+
+        @if (passwordMissing) {
+          <p class="mt-2 text-xs text-red-600">Este campo es obligatorio</p>
+        }
       </div>
 
 

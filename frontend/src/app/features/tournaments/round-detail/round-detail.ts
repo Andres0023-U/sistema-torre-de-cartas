@@ -178,7 +178,9 @@ export class RoundDetail implements OnInit {
     this.deckService.getDeckById(deckId).subscribe({
       next: (deck) => {
         const player = this.allPlayers.find(p => p.playerId === deck.playerId);
-        this.playerNames[deckId] = player ? player.name : `Mazo ${deckId}`;
+        this.playerNames[deckId] = player
+          ? `${player.name} #${player.playerId}`
+          : `Mazo ${deckId}`;
         this.cdr.markForCheck();
       }
     });

@@ -39,12 +39,20 @@ export class Home implements OnInit {
   }
 
   get menuItems() {
+    const role = localStorage.getItem('role');
     const items = [
-      { path: '/tournaments', title: 'Torneos', description: 'Ver, crear y gestionar torneos' },
-      { path: '/decks', title: 'Mis mazos', description: 'Construye y edita tus mazos de combate' }
+      { path: '/tournaments', title: 'Torneos', description: 'Ver, crear y gestionar torneos' }
     ];
 
-    if (localStorage.getItem('role') === 'admin') {
+    if (role === 'player') {
+      items.push({
+        path: '/decks',
+        title: 'Mis mazos',
+        description: 'Construye y edita tus mazos de combate'
+      });
+    }
+
+    if (role === 'admin') {
       items.unshift({
         path: '/admin',
         title: 'Administración',

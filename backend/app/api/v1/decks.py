@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.core.database import get_db
-from app.core.security import get_current_user_payload
+from app.core.security import get_current_user_payload, require_role
 from app.schemas.deck import DeckCreate, DeckResponse
 from app.schemas.deck_card import DeckCardCreate, DeckCardResponse
 from app.models.players import Deck, Player, DeckCard
@@ -31,7 +31,7 @@ def get_my_deck_or_404(deck_id: int, player: Player, db: Session) -> Deck:
 def create_deck(
     data: DeckCreate,
     db: Session = Depends(get_db),
-    payload: dict = Depends(get_current_user_payload)
+    payload: dict = Depends(require_role(["player"]))
 ):
     player = get_player_or_404(int(payload["sub"]), db)
     deck = Deck(player_id=player.player_id, name=data.name)
@@ -44,7 +44,7 @@ def create_deck(
 @router.get("/me", response_model=list[DeckResponse])
 def list_my_decks(
     db: Session = Depends(get_db),
-    payload: dict = Depends(get_current_user_payload)
+    payload: dict = Depends(require_role(["player"]))
 ):
     player = get_player_or_404(int(payload["sub"]), db)
     return db.query(Deck).filter(Deck.player_id == player.player_id).all()
@@ -55,10 +55,10 @@ def add_card_to_deck(
     deck_id: int,
     data: DeckCardCreate,
     db: Session = Depends(get_db),
-    payload: dict = Depends(get_current_user_payload)
+    payload: dict = Depends(require_role(["player"]))
 ):
     player = get_player_or_404(int(payload["sub"]), db)
-    deck = get_my_deck_or_404(deck_id, player, db)
+    get_my_deck_or_404(deck_id, player, db)
 
     card = db.query(Card).filter(Card.card_id == data.card_id).first()
     if not card:
@@ -88,13 +88,12 @@ def add_card_to_deck(
 def list_deck_cards(
     deck_id: int,
     db: Session = Depends(get_db),
-    payload: dict = Depends(get_current_user_payload)
+    payload: dict = Depends(require_role(["player"]))
 ):
     player = get_player_or_404(int(payload["sub"]), db)
     get_my_deck_or_404(deck_id, player, db)
     return db.query(DeckCard).filter(DeckCard.deck_id == deck_id).all()
 
-from app.schemas.deck_card import DeckCardCreate, DeckCardResponse
 
 @router.put("/{deck_id}/cards/{card_id}", response_model=DeckCardResponse)
 def update_card_quantity(
@@ -102,10 +101,10 @@ def update_card_quantity(
     card_id: int,
     data: DeckCardCreate,
     db: Session = Depends(get_db),
-    payload: dict = Depends(get_current_user_payload)
+    payload: dict = Depends(require_role(["player"]))
 ):
     player = get_player_or_404(int(payload["sub"]), db)
-    deck = get_my_deck_or_404(deck_id, player, db)
+    get_my_deck_or_404(deck_id, player, db)
 
     card = db.query(Card).filter(Card.card_id == card_id).first()
     if not card:
@@ -135,10 +134,10 @@ def remove_card_from_deck(
     deck_id: int,
     card_id: int,
     db: Session = Depends(get_db),
-    payload: dict = Depends(get_current_user_payload)
+    payload: dict = Depends(require_role(["player"]))
 ):
     player = get_player_or_404(int(payload["sub"]), db)
-    deck = get_my_deck_or_404(deck_id, player, db)
+    get_my_deck_or_404(deck_id, player, db)
 
     deck_card = db.query(DeckCard).filter(
         DeckCard.deck_id == deck_id,
@@ -150,6 +149,9 @@ def remove_card_from_deck(
     db.delete(deck_card)
     db.commit()
 
+
+# Abierto a cualquier usuario autenticado: round-detail lo usa para mostrar
+# de quién es cada mazo, y esa pantalla la abre el organizador.
 @router.get("/{deck_id}", response_model=DeckResponse)
 def get_deck(
     deck_id: int,
