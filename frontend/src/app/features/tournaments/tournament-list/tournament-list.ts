@@ -39,8 +39,14 @@ export class TournamentList implements OnInit {
   onCreate(): void {
     this.errorMessage = '';
     this.successMessage = '';
+
+    const name = this.name.trim();
+    if (!name || !this.date) {
+      return;
+    }
+
     this.tournamentService.createTournament({
-      name: this.name,
+      name,
       date: this.date,
       format: 'single_elimination',
       numPlayers: this.numPlayers

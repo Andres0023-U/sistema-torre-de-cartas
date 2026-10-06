@@ -78,8 +78,8 @@ export class TournamentDetail implements OnInit {
         this.successMessage = 'Jugador inscrito';
         this.loadAll();
       },
-      error: () => {
-        this.errorMessage = 'No se pudo inscribir al jugador';
+      error: (err) => {
+        this.errorMessage = err.error?.detail || 'No se pudo inscribir al jugador';
         this.cdr.markForCheck();
       }
     });

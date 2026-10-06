@@ -21,66 +21,97 @@
         }
       </h1>
 
-      <p class="text-slate-500 text-base">
-        Elige una opción para comenzar.
-      </p>
+      @if (!isPending) {
+        <p class="text-slate-500 text-base">
+          Elige una opción para comenzar.
+        </p>
+      }
     </div>
 
 
-    <!-- Opciones principales -->
-    <div class="grid md:grid-cols-2 gap-6">
+    @if (isPending) {
 
-      @for (item of menuItems; track item.path) {
+      <!-- Cuenta pendiente de aprobación -->
+      <div
+        class="relative overflow-hidden bg-white border border-slate-200
+               rounded-xl shadow-sm p-7 max-w-xl">
 
-        <a
-          [routerLink]="item.path"
-          class="group relative block p-7 bg-white border border-slate-200
-                 rounded-xl shadow-sm transition-all duration-200
-                 hover:-translate-y-1 hover:shadow-lg"
-        >
+        <div
+          class="absolute left-0 top-0 h-full w-1 rounded-l-xl"
+          style="background:#c9a227">
+        </div>
 
-          <!-- Línea dorada -->
-          <div
-            class="absolute left-0 top-0 h-full w-1 rounded-l-xl
-                   transition-all duration-200 group-hover:w-2"
-            style="background:#c9a227">
-          </div>
+        <p
+          class="text-xl mb-2"
+          style="font-family:'Cinzel',serif; font-weight:600; color:#0f172a">
+          Tu cuenta está pendiente de aprobación
+        </p>
 
+        <p class="text-sm text-slate-500 leading-relaxed">
+          Un administrador debe asignarte un rol antes de que puedas usar
+          el sistema. Cuando lo haga, cierra sesión y vuelve a entrar
+          para ver tus opciones.
+        </p>
+      </div>
 
-          <div class="flex items-start justify-between">
+    } @else {
 
-            <div>
+      <!-- Opciones principales -->
+      <div class="grid md:grid-cols-2 gap-6">
 
-              <p
-                class="text-xl mb-2"
-                style="font-family:'Cinzel',serif;
-                       font-weight:600;
-                       color:#0f172a">
-                {{ item.title }}
-              </p>
+        @for (item of menuItems; track item.path) {
 
-              <p class="text-sm text-slate-500 leading-relaxed">
-                {{ item.description }}
-              </p>
+          <a
+            [routerLink]="item.path"
+            class="group relative block p-7 bg-white border border-slate-200
+                   rounded-xl shadow-sm transition-all duration-200
+                   hover:-translate-y-1 hover:shadow-lg"
+          >
 
+            <!-- Línea dorada -->
+            <div
+              class="absolute left-0 top-0 h-full w-1 rounded-l-xl
+                     transition-all duration-200 group-hover:w-2"
+              style="background:#c9a227">
             </div>
 
 
-            <!-- Flecha -->
-            <span
-              class="text-2xl ml-4 transition-transform duration-200
-                     group-hover:translate-x-1"
-              style="color:#c9a227">
-              →
-            </span>
+            <div class="flex items-start justify-between">
 
-          </div>
+              <div>
 
-        </a>
+                <p
+                  class="text-xl mb-2"
+                  style="font-family:'Cinzel',serif;
+                         font-weight:600;
+                         color:#0f172a">
+                  {{ item.title }}
+                </p>
 
-      }
+                <p class="text-sm text-slate-500 leading-relaxed">
+                  {{ item.description }}
+                </p>
 
-    </div>
+              </div>
+
+
+              <!-- Flecha -->
+              <span
+                class="text-2xl ml-4 transition-transform duration-200
+                       group-hover:translate-x-1"
+                style="color:#c9a227">
+                →
+              </span>
+
+            </div>
+
+          </a>
+
+        }
+
+      </div>
+
+    }
 
 
     <!-- Separador -->

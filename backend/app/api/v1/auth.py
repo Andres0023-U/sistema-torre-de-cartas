@@ -6,6 +6,7 @@ from app.models.security import User, Role
 from app.core.security import verify_password, hash_password, create_access_token, get_current_user_payload, require_role
 from app.schemas.register import RegisterRequest
 from app.schemas.user_admin import AssignRoleRequest, UserAdminResponse
+from app.models.players import Player
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -82,8 +83,22 @@ def assign_role(
     if not user:
         raise HTTPException(status_code=404, detail="Usuario no encontrado")
 
+    current_role = db.query(Role).filter(Role.role_id == user.role_id).first()
+    if current_role.name != "pending":
+        raise HTTPException(status_code=400, detail="Solo se puede asignar rol a usuarios pendientes")
+
     role = db.query(Role).filter(Role.name == data.role).first()
+    if not role:
+        raise HTTPException(status_code=500, detail=f"Rol '{data.role}' no configurado en el sistema")
+
     user.role_id = role.role_id
+
+    # Los jugadores necesitan perfil para crear mazos e inscribirse
+    if role.name == "player":
+        has_profile = db.query(Player).filter(Player.user_id == user.user_id).first()
+        if not has_profile:
+            db.add(Player(user_id=user.user_id))
+
     db.commit()
     db.refresh(user)
 

@@ -1,12 +1,12 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { DeckService } from '../../../core/services/deck';
 import { CardService } from '../../../core/services/card';
 import { Deck, DeckCard, Card } from '../../../models/deck.model';
 
 @Component({
   selector: 'app-deck-detail',
-  imports: [],
+  imports: [RouterLink],
   templateUrl: './deck-detail.html',
   styleUrl: './deck-detail.css'
 })

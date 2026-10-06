@@ -1,0 +1,103 @@
+<div class="min-h-[calc(100vh-56px)]" style="background:#f7f4ed">
+  <div class="max-w-3xl mx-auto px-6 py-12">
+
+    <a routerLink="/" class="text-sm text-slate-500 hover:underline">← Volver</a>
+
+    <!-- Encabezado -->
+    <div class="mt-6 mb-10">
+      <p class="text-sm uppercase tracking-[0.25em] mb-3" style="color:#b08a18">
+        Administración
+      </p>
+      <h1
+        class="text-3xl md:text-4xl mb-3"
+        style="font-family:'Cinzel',serif; font-weight:700; color:#0f172a">
+        Usuarios pendientes
+      </h1>
+      <p class="text-slate-500 text-base">
+        Asigna un rol a los usuarios que se acaban de registrar.
+      </p>
+    </div>
+
+    <!-- Mensajes -->
+    @if (errorMessage) {
+      <div class="mb-5 px-4 py-3 rounded-lg bg-red-50 border border-red-200">
+        <p class="text-red-700 text-sm">{{ errorMessage }}</p>
+      </div>
+    }
+
+    @if (successMessage) {
+      <div class="mb-5 px-4 py-3 rounded-lg bg-green-50 border border-green-200">
+        <p class="text-green-700 text-sm">{{ successMessage }}</p>
+      </div>
+    }
+
+    <!-- Contenido -->
+    @if (loading) {
+      <p class="text-slate-500 text-sm">Cargando usuarios...</p>
+    } @else if (users.length === 0) {
+
+      <div class="relative overflow-hidden bg-white border border-slate-200 rounded-xl shadow-sm p-7">
+        <div class="absolute left-0 top-0 h-full w-1 rounded-l-xl" style="background:#c9a227"></div>
+        <p
+          class="text-lg mb-1"
+          style="font-family:'Cinzel',serif; font-weight:600; color:#0f172a">
+          No hay usuarios pendientes
+        </p>
+        <p class="text-sm text-slate-500">
+          Cuando alguien se registre, aparecerá aquí.
+        </p>
+      </div>
+
+    } @else {
+
+      <div class="space-y-4">
+        @for (user of users; track user.userId) {
+
+          <div class="relative overflow-hidden bg-white border border-slate-200 rounded-xl shadow-sm p-6">
+            <div class="absolute left-0 top-0 h-full w-1 rounded-l-xl" style="background:#c9a227"></div>
+
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+
+              <div>
+                <p
+                  class="text-lg"
+                  style="font-family:'Cinzel',serif; font-weight:600; color:#0f172a">
+                  {{ user.name }}
+                </p>
+                <p class="text-sm text-slate-500">{{ user.email }}</p>
+              </div>
+
+              <div class="flex gap-3">
+                <button
+                  type="button"
+                  (click)="assign(user, 'organizer')"
+                  [disabled]="processingId === user.userId"
+                  class="text-white text-sm px-4 py-2 rounded-lg font-medium
+                         transition-all duration-200 hover:opacity-90
+                         disabled:opacity-50 disabled:cursor-not-allowed"
+                  style="background:#0f172a">
+                  Organizador
+                </button>
+
+                <button
+                  type="button"
+                  (click)="assign(user, 'player')"
+                  [disabled]="processingId === user.userId"
+                  class="text-sm px-4 py-2 rounded-lg font-medium border
+                         transition-all duration-200 hover:bg-slate-50
+                         disabled:opacity-50 disabled:cursor-not-allowed"
+                  style="color:#0f172a; border-color:#c9a227">
+                  Jugador
+                </button>
+              </div>
+
+            </div>
+          </div>
+
+        }
+      </div>
+
+    }
+
+  </div>
+</div>

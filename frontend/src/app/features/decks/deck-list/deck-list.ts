@@ -30,7 +30,12 @@ export class DeckList implements OnInit {
   }
 
   onCreate(): void {
-    this.deckService.createDeck({ name: this.name }).subscribe({
+    const name = this.name.trim();
+    if (!name) {
+      return;
+    }
+
+    this.deckService.createDeck({ name }).subscribe({
       next: () => {
         this.name = '';
         this.load();

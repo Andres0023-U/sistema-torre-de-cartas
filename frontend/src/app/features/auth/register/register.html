@@ -1,0 +1,67 @@
+<div class="min-h-screen flex items-center justify-center" style="background:#f7f4ed">
+  <div class="w-full max-w-sm">
+
+    <div class="text-center mb-8">
+      <p class="text-sm uppercase tracking-[0.25em] mb-2" style="color:#b08a18">
+        Sistema de Torneos
+      </p>
+      <h1 class="text-4xl" style="font-family:'Cinzel',serif; font-weight:700; color:#0f172a">
+        S.T.C
+      </h1>
+    </div>
+
+    <form (ngSubmit)="onSubmit()" class="bg-white p-8 rounded-xl shadow-sm border border-slate-200 relative">
+      <div class="absolute left-0 top-0 h-full w-1 rounded-l-xl" style="background:#c9a227"></div>
+
+      <h2 class="text-lg mb-6" style="font-family:'Cinzel',serif; font-weight:600; color:#0f172a">
+        Crear cuenta
+      </h2>
+
+      <label class="block mb-2 text-sm text-slate-600">Nombre</label>
+      <input
+        type="text"
+        [(ngModel)]="name"
+        name="name"
+        maxlength="20"
+        class="w-full border border-slate-300 rounded-lg px-3 py-2 mb-4 outline-none focus:border-[#c9a227] transition-colors"
+        required
+      >
+
+      <label class="block mb-2 text-sm text-slate-600">Correo</label>
+      <input
+        type="email"
+        [(ngModel)]="email"
+        name="email"
+        class="w-full border border-slate-300 rounded-lg px-3 py-2 mb-4 outline-none focus:border-[#c9a227] transition-colors"
+        required
+      >
+
+      <label class="block mb-2 text-sm text-slate-600">Contraseña</label>
+      <input
+        type="password"
+        [(ngModel)]="password"
+        name="password"
+        class="w-full border border-slate-300 rounded-lg px-3 py-2 mb-1 outline-none focus:border-[#c9a227] transition-colors"
+        required
+      >
+      <p class="text-xs text-slate-400 mb-4">Mínimo 8 caracteres, con al menos una letra y un número.</p>
+
+      @if (errorMessage) {
+        <p class="text-red-700 text-sm mb-4">{{ errorMessage }}</p>
+      }
+
+      <button
+        type="submit"
+        class="w-full text-white py-2.5 rounded-lg transition-colors"
+        style="background:#0f172a"
+      >
+        Crear cuenta
+      </button>
+
+      <p class="text-center text-sm text-slate-500 mt-5">
+        ¿Ya tienes cuenta? <a routerLink="/login" class="font-medium" style="color:#b08a18">Inicia sesión</a>
+      </p>
+    </form>
+
+  </div>
+</div>

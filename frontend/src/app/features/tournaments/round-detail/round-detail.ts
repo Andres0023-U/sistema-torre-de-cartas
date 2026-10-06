@@ -1,6 +1,6 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { MatchService } from '../../../core/services/match';
 import { TournamentService } from '../../../core/services/tournament';
 import { Match, Result, Round } from '../../../models/tournament.model';
@@ -10,7 +10,7 @@ import { PlayerWithUser } from '../../../models/player.model';
 
 @Component({
   selector: 'app-round-detail',
-  imports: [FormsModule],
+  imports: [FormsModule, RouterLink],
   templateUrl: './round-detail.html',
   styleUrl: './round-detail.css'
 })
@@ -21,25 +21,32 @@ export class RoundDetail implements OnInit {
   round: Round | null = null;
   errorMessage = '';
   successMessage = '';
-  playerNames: Record<number, string> = {}; 
+  playerNames: Record<number, string> = {};
   private allPlayers: PlayerWithUser[] = [];
 
   tournamentId!: number;
   roundId!: number;
 
   constructor(
-  private route: ActivatedRoute,
-  private router: Router,
-  private matchService: MatchService,
-  private tournamentService: TournamentService,
-  private deckService: DeckService,
-  private playerService: PlayerService,
-  private cdr: ChangeDetectorRef
-
+    private route: ActivatedRoute,
+    private router: Router,
+    private matchService: MatchService,
+    private tournamentService: TournamentService,
+    private deckService: DeckService,
+    private playerService: PlayerService,
+    private cdr: ChangeDetectorRef
   ) {}
+
+  get isOrganizer(): boolean {
+    return localStorage.getItem('role') === 'organizer';
+  }
 
   get allResultsIn(): boolean {
     return this.matches.length > 0 && this.matches.every(m => this.results[m.matchId]);
+  }
+
+  get canAdvance(): boolean {
+    return this.isOrganizer && this.allResultsIn && this.round?.status !== 'finished';
   }
 
   get isLastRoundPossible(): boolean {
@@ -109,6 +116,7 @@ export class RoundDetail implements OnInit {
 
   onGenerate(): void {
     this.errorMessage = '';
+    this.successMessage = '';
     this.matchService.generateMatches(this.roundId).subscribe({
       next: () => {
         this.successMessage = 'Emparejamientos generados';
@@ -123,6 +131,7 @@ export class RoundDetail implements OnInit {
 
   onSubmitResult(matchId: number): void {
     this.errorMessage = '';
+    this.successMessage = '';
     const form = this.forms[matchId];
     this.matchService.createResult(matchId, {
       winnerId: Number(form.winnerId),
@@ -143,11 +152,12 @@ export class RoundDetail implements OnInit {
 
   onNextRound(): void {
     this.errorMessage = '';
+    this.successMessage = '';
     this.tournamentService.nextRound(this.tournamentId).subscribe({
       next: (res) => {
         if (res.status === 'finished') {
-          this.successMessage = `¡Torneo finalizado! Campeón: Mazo ${res.champion_deck_id}`;
-          this.cdr.markForCheck();
+          this.successMessage = `¡Torneo finalizado! Campeón: ${this.getPlayerName(res.champion_deck_id)}`;
+          this.load();
         } else {
           this.router.navigate(['/tournaments', this.tournamentId, 'rounds', res.round_id]);
         }

@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, tap, map } from 'rxjs';
 import { LoginRequest, LoginResponse } from '../../models/auth.model';
 import { environment } from '../../../environments/environment';
+import { RegisterRequest } from '../../models/register.model';
 
 @Injectable({
   providedIn: 'root'
@@ -44,4 +45,19 @@ export class AuthService {
       map(u => ({ userId: u.user_id, role: u.role, name: u.name }))
     );
   }
+
+  register(data: RegisterRequest): Observable<LoginResponse> {
+    return this.http.post<any>(`${this.apiUrl}/register`, data).pipe(
+      map(response => ({
+        accessToken: response.access_token,
+        tokenType: response.token_type,
+        role: response.role
+      } as LoginResponse)),
+      tap(response => {
+        localStorage.setItem('access_token', response.accessToken);
+        localStorage.setItem('role', response.role);
+      })
+    );
+  }
+
 }

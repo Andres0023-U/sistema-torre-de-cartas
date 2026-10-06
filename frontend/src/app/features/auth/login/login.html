@@ -10,43 +10,114 @@
       </h1>
     </div>
 
-    <form (ngSubmit)="onSubmit()" class="bg-white p-8 rounded-xl shadow-sm border border-slate-200 relative">
-      <div class="absolute left-0 top-0 h-full w-1 rounded-l-xl" style="background:#c9a227"></div>
+    <form
+      (ngSubmit)="onSubmit()"
+      class="bg-white p-8 rounded-xl shadow-sm border border-slate-200 relative overflow-hidden"
+    >
 
-      <h2 class="text-lg mb-6" style="font-family:'Cinzel',serif; font-weight:600; color:#0f172a">
-        Iniciar sesión
-      </h2>
+      <!-- Línea dorada lateral -->
+      <div
+        class="absolute left-0 top-0 h-full w-1"
+        style="background:#c9a227">
+      </div>
 
-      <label class="block mb-2 text-sm text-slate-600">Correo</label>
-      <input
-        type="email"
-        [(ngModel)]="email"
-        name="email"
-        class="w-full border border-slate-300 rounded-lg px-3 py-2 mb-4 outline-none focus:border-[#c9a227] transition-colors"
-        required
-      >
 
-      <label class="block mb-2 text-sm text-slate-600">Contraseña</label>
-      <input
-        type="password"
-        [(ngModel)]="password"
-        name="password"
-        class="w-full border border-slate-300 rounded-lg px-3 py-2 mb-4 outline-none focus:border-[#c9a227] transition-colors"
-        required
-      >
+      <!-- Encabezado -->
+      <div class="mb-7">
+        <p
+          class="text-xs uppercase tracking-[0.2em] mb-2"
+          style="color:#b08a18">
+          S.T.C.
+        </p>
 
+        <h2
+          class="text-2xl"
+          style="font-family:'Cinzel',serif; font-weight:600; color:#0f172a">
+          Iniciar sesión
+        </h2>
+
+        <p class="text-sm text-slate-500 mt-2">
+          Ingresa tus datos para continuar.
+        </p>
+      </div>
+
+
+      <!-- Correo -->
+      <div class="mb-5">
+        <label class="block mb-2 text-sm font-medium text-slate-600">
+          Correo electrónico
+        </label>
+
+        <input
+          type="email"
+          [(ngModel)]="email"
+          name="email"
+          placeholder="correo@ejemplo.com"
+          class="w-full border border-slate-300 rounded-lg px-4 py-3
+                outline-none bg-slate-50
+                focus:bg-white focus:border-[#c9a227]
+                focus:ring-1 focus:ring-[#c9a227]
+                transition-all duration-200"
+          required
+        >
+      </div>
+
+
+      <!-- Contraseña -->
+      <div class="mb-5">
+        <label class="block mb-2 text-sm font-medium text-slate-600">
+          Contraseña
+        </label>
+
+        <input
+          type="password"
+          [(ngModel)]="password"
+          name="password"
+          placeholder="••••••••"
+          class="w-full border border-slate-300 rounded-lg px-4 py-3
+                outline-none bg-slate-50
+                focus:bg-white focus:border-[#c9a227]
+                focus:ring-1 focus:ring-[#c9a227]
+                transition-all duration-200"
+          required
+        >
+      </div>
+
+
+      <!-- Error -->
       @if (errorMessage) {
-        <p class="text-red-700 text-sm mb-4">{{ errorMessage }}</p>
+        <div class="mb-5 px-4 py-3 rounded-lg bg-red-50 border border-red-200">
+          <p class="text-red-700 text-sm">
+            {{ errorMessage }}
+          </p>
+        </div>
       }
 
+
+      <!-- Botón -->
       <button
         type="submit"
-        class="w-full text-white py-2.5 rounded-lg transition-colors"
+        class="w-full text-white py-3 rounded-lg
+              font-medium transition-all duration-200
+              hover:opacity-90 hover:shadow-md
+              active:scale-[0.99]"
         style="background:#0f172a"
       >
         Entrar
       </button>
-    </form>
 
+
+      <!-- Registro -->
+      <p class="text-center text-sm text-slate-500 mt-6">
+        ¿No tienes cuenta?
+        <a
+          routerLink="/register"
+          class="font-medium hover:underline"
+          style="color:#b08a18">
+          Regístrate
+        </a>
+      </p>
+
+    </form>
   </div>
 </div>

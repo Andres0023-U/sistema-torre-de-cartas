@@ -30,14 +30,29 @@ export class Home implements OnInit {
     const role = localStorage.getItem('role');
     if (role === 'organizer') return 'Organizador';
     if (role === 'admin') return 'Administrador';
+    if (role === 'pending') return 'Pendiente de aprobación';
     return 'Jugador';
   }
 
+  get isPending(): boolean {
+    return localStorage.getItem('role') === 'pending';
+  }
+
   get menuItems() {
-    return [
+    const items = [
       { path: '/tournaments', title: 'Torneos', description: 'Ver, crear y gestionar torneos' },
       { path: '/decks', title: 'Mis mazos', description: 'Construye y edita tus mazos de combate' }
     ];
+
+    if (localStorage.getItem('role') === 'admin') {
+      items.unshift({
+        path: '/admin',
+        title: 'Administración',
+        description: 'Aprueba usuarios nuevos y asigna sus roles'
+      });
+    }
+
+    return items;
   }
 
   logout(): void {
