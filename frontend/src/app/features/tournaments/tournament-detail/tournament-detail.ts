@@ -1,13 +1,13 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TournamentService } from '../../../core/services/tournament';
 import { PlayerService } from '../../../core/services/player';
-import { Tournament } from '../../../models/tournament.model';
+import { Tournament, Round } from '../../../models/tournament.model';
 import { PlayerWithUser } from '../../../models/player.model';
 
 @Component({
   selector: 'app-tournament-detail',
-  imports: [],
+  imports: [RouterLink],
   templateUrl: './tournament-detail.html',
   styleUrl: './tournament-detail.css'
 })
@@ -15,6 +15,7 @@ export class TournamentDetail implements OnInit {
   tournament: Tournament | null = null;
   allPlayers: PlayerWithUser[] = [];
   registeredIds: number[] = [];
+  rounds: Round[] = [];
   errorMessage = '';
   successMessage = '';
 
@@ -42,6 +43,15 @@ export class TournamentDetail implements OnInit {
       next: (list) => {
         this.tournament = list.find(t => t.tournamentId === this.tournamentId) ?? null;
         this.cdr.markForCheck();
+
+        if (this.tournament && this.tournament.status !== 'pending') {
+          this.tournamentService.getRounds(this.tournamentId).subscribe({
+            next: (rounds) => {
+              this.rounds = rounds;
+              this.cdr.markForCheck();
+            }
+          });
+        }
       }
     });
 

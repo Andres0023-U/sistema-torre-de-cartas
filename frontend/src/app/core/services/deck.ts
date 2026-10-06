@@ -53,4 +53,11 @@ export class DeckService {
   removeCard(deckId: number, cardId: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${deckId}/cards/${cardId}`);
   }
+
+  getDeckById(deckId: number): Observable<Deck> {
+    return this.http.get<any>(`${this.apiUrl}/${deckId}`).pipe(
+      map(d => ({ deckId: d.deck_id, playerId: d.player_id, name: d.name }))
+    );
+  }
+  
 }

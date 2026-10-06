@@ -41,8 +41,16 @@
       }
     }
 
-    @if (tournament.status !== 'pending') {
-      <p class="text-slate-700">Este torneo ya está {{ tournament.status === 'in_progress' ? 'en curso' : 'finalizado' }}.</p>
+    @if (tournament.status === 'in_progress' || tournament.status === 'finished') {
+      <div class="bg-white p-4 rounded shadow max-w-lg">
+        <h2 class="font-semibold mb-3">Rondas</h2>
+        @for (r of rounds; track r.roundId) {
+          <a [routerLink]="['/tournaments', tournamentId, 'rounds', r.roundId]"
+             class="block border-b py-2 last:border-0 hover:bg-slate-50">
+            {{ r.name }} · {{ r.status }}
+          </a>
+        }
+      </div>
     }
   }
 </div>

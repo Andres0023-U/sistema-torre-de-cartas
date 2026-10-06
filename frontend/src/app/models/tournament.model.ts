@@ -34,3 +34,36 @@ export interface StartTournamentResponse {
   status: string;
   roundId: number;
 }
+
+export interface Match {
+  matchId: number;
+  roundId: number;
+  deck1Id: number;
+  deck2Id: number;
+}
+
+export interface Result {
+  resultId: number;
+  matchId: number;
+  winnerId: number;
+  endPhase: string;
+  player1FinalLife: number;
+  player2FinalLife: number;
+  player1Points: number;
+  player2Points: number;
+  date: string;
+}
+
+export interface ResultCreate {
+  winnerId: number;
+  endPhase: string;
+  player1FinalLife: number;
+  player2FinalLife: number;
+}
+
+export interface NextRoundResponse {
+  status: string;
+  roundId?: number;
+  championDeckId?: number;
+  championPlayerId?: number;
+}

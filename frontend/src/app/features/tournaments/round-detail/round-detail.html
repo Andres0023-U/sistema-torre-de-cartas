@@ -1,0 +1,55 @@
+<div class="p-6">
+  <h1 class="text-2xl font-bold mb-4">{{ round?.name }}</h1>
+
+  @if (successMessage) {
+    <p class="text-green-600 text-sm mb-2">{{ successMessage }}</p>
+  }
+  @if (errorMessage) {
+    <p class="text-red-600 text-sm mb-2">{{ errorMessage }}</p>
+  }
+
+  @if (matches.length === 0) {
+    <button (click)="onGenerate()" class="bg-slate-900 text-white px-4 py-2 rounded mb-4">
+      Generar emparejamientos
+    </button>
+  }
+
+  <div class="grid gap-4 max-w-2xl">
+    @for (m of matches; track m.matchId) {
+      <div class="bg-white p-4 rounded shadow">
+        <p class="font-semibold mb-2">{{ getPlayerName(m.deck1Id) }} vs {{ getPlayerName(m.deck2Id) }}</p>
+
+        @if (getResult(m.matchId); as result) {
+          <p class="text-sm text-slate-700">
+            Ganador: {{ getPlayerName(result.winnerId) }} · {{ result.endPhase }} ·
+            puntos {{ result.player1Points }} / {{ result.player2Points }}
+          </p>
+        } @else {
+          <div class="grid grid-cols-2 gap-2 text-sm">
+            <select [(ngModel)]="forms[m.matchId].winnerId" class="border rounded px-2 py-1">
+              <option [ngValue]="m.deck1Id">Gana {{ getPlayerName(m.deck1Id) }}</option>
+              <option [ngValue]="m.deck2Id">Gana {{ getPlayerName(m.deck2Id) }}</option>
+            </select>
+            <select [(ngModel)]="forms[m.matchId].endPhase" class="border rounded px-2 py-1">
+              <option value="normal">Normal</option>
+              <option value="overtime">Overtime</option>
+            </select>
+            <input [(ngModel)]="forms[m.matchId].player1FinalLife" type="number" placeholder="Vida final mazo 1"
+              class="border rounded px-2 py-1">
+            <input [(ngModel)]="forms[m.matchId].player2FinalLife" type="number" placeholder="Vida final mazo 2"
+              class="border rounded px-2 py-1">
+          </div>
+          <button (click)="onSubmitResult(m.matchId)" class="bg-slate-700 text-white text-sm px-3 py-1 rounded mt-2">
+            Registrar resultado
+          </button>
+        }
+      </div>
+    }
+  </div>
+
+  @if (allResultsIn) {
+    <button (click)="onNextRound()" class="bg-green-700 text-white px-4 py-2 rounded mt-4">
+      {{ isLastRoundPossible ? 'Finalizar torneo / Siguiente ronda' : 'Siguiente ronda' }}
+    </button>
+  }
+</div>

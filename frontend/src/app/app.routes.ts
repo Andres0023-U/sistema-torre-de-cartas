@@ -6,6 +6,7 @@ import { TournamentDetail } from './features/tournaments/tournament-detail/tourn
 import { authGuard } from './core/guards/auth-guard';
 import { DeckList } from './features/decks/deck-list/deck-list';
 import { DeckDetail } from './features/decks/deck-detail/deck-detail';
+import { RoundDetail } from './features/tournaments/round-detail/round-detail';
 
 export const routes: Routes = [
   { path: 'login', component: Login },
@@ -13,5 +14,7 @@ export const routes: Routes = [
   { path: 'tournaments', component: TournamentList, canActivate: [authGuard] },
   { path: 'tournaments/:id', component: TournamentDetail, canActivate: [authGuard] },
   { path: 'decks', component: DeckList, canActivate: [authGuard] },
-  { path: 'decks/:id', component: DeckDetail, canActivate: [authGuard] }
+  { path: 'decks/:id', component: DeckDetail, canActivate: [authGuard] },
+  { path: 'tournaments/:id/rounds/:roundId', component: RoundDetail, canActivate: [authGuard] }
+
 ];
