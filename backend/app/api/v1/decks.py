@@ -149,3 +149,14 @@ def remove_card_from_deck(
 
     db.delete(deck_card)
     db.commit()
+
+@router.get("/{deck_id}", response_model=DeckResponse)
+def get_deck(
+    deck_id: int,
+    db: Session = Depends(get_db),
+    payload: dict = Depends(get_current_user_payload)
+):
+    deck = db.query(Deck).filter(Deck.deck_id == deck_id).first()
+    if not deck:
+        raise HTTPException(status_code=404, detail="Mazo no encontrado")
+    return deck
