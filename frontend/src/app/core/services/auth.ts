@@ -39,7 +39,9 @@ export class AuthService {
     return !!this.getToken();
   }
 
-  getCurrentUser(): Observable<any> {
-    return this.http.get(`${this.apiUrl}/me`);
+  getCurrentUser(): Observable<{ userId: string; role: string; name: string }> {
+    return this.http.get<any>(`${this.apiUrl}/me`).pipe(
+      map(u => ({ userId: u.user_id, role: u.role, name: u.name }))
+    );
   }
 }

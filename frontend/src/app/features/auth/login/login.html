@@ -1,34 +1,52 @@
-<div class="min-h-screen flex items-center justify-center bg-slate-100">
-  <form (ngSubmit)="onSubmit()" class="bg-white p-8 rounded-lg shadow-md w-80">
-    <h1 class="text-xl font-bold mb-4 text-slate-900">Iniciar sesión</h1>
+<div class="min-h-screen flex items-center justify-center" style="background:#f7f4ed">
+  <div class="w-full max-w-sm">
 
-    <label class="block mb-2 text-sm text-slate-700">Correo</label>
-    <input
-      type="email"
-      [(ngModel)]="email"
-      name="email"
-      class="w-full border rounded px-3 py-2 mb-4"
-      required
-    >
+    <div class="text-center mb-8">
+      <p class="text-sm uppercase tracking-[0.25em] mb-2" style="color:#b08a18">
+        Sistema de Torneos
+      </p>
+      <h1 class="text-4xl" style="font-family:'Cinzel',serif; font-weight:700; color:#0f172a">
+        S.T.C
+      </h1>
+    </div>
 
-    <label class="block mb-2 text-sm text-slate-700">Contraseña</label>
-    <input
-      type="password"
-      [(ngModel)]="password"
-      name="password"
-      class="w-full border rounded px-3 py-2 mb-4"
-      required
-    >
+    <form (ngSubmit)="onSubmit()" class="bg-white p-8 rounded-xl shadow-sm border border-slate-200 relative">
+      <div class="absolute left-0 top-0 h-full w-1 rounded-l-xl" style="background:#c9a227"></div>
 
-    @if (errorMessage) {
-      <p class="text-red-600 text-sm mb-4">{{ errorMessage }}</p>
-    }
+      <h2 class="text-lg mb-6" style="font-family:'Cinzel',serif; font-weight:600; color:#0f172a">
+        Iniciar sesión
+      </h2>
 
-    <button
-      type="submit"
-      class="w-full bg-slate-900 text-white py-2 rounded hover:bg-slate-800"
-    >
-      Entrar
-    </button>
-  </form>
+      <label class="block mb-2 text-sm text-slate-600">Correo</label>
+      <input
+        type="email"
+        [(ngModel)]="email"
+        name="email"
+        class="w-full border border-slate-300 rounded-lg px-3 py-2 mb-4 outline-none focus:border-[#c9a227] transition-colors"
+        required
+      >
+
+      <label class="block mb-2 text-sm text-slate-600">Contraseña</label>
+      <input
+        type="password"
+        [(ngModel)]="password"
+        name="password"
+        class="w-full border border-slate-300 rounded-lg px-3 py-2 mb-4 outline-none focus:border-[#c9a227] transition-colors"
+        required
+      >
+
+      @if (errorMessage) {
+        <p class="text-red-700 text-sm mb-4">{{ errorMessage }}</p>
+      }
+
+      <button
+        type="submit"
+        class="w-full text-white py-2.5 rounded-lg transition-colors"
+        style="background:#0f172a"
+      >
+        Entrar
+      </button>
+    </form>
+
+  </div>
 </div>

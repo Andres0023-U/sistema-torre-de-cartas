@@ -1,6 +1,100 @@
-<div class="p-6">
-  <h1 class="text-2xl font-bold">Bienvenido a S.T.C</h1>
-  <button (click)="logout()" class="mt-4 bg-slate-900 text-white px-4 py-2 rounded">
-    Cerrar sesión
-  </button>
+<div class="min-h-[calc(100vh-56px)]" style="background:#f7f4ed">
+
+  <!-- Contenedor principal -->
+  <div class="max-w-5xl mx-auto px-6 py-12">
+
+    <!-- Encabezado -->
+    <div class="mb-12">
+      <p
+        class="text-sm uppercase tracking-[0.25em] mb-3"
+        style="color:#b08a18">
+        {{ roleLabel }}
+      </p>
+
+      <h1
+        class="text-4xl md:text-5xl mb-3"
+        style="font-family:'Cinzel',serif; font-weight:700; color:#0f172a">
+        @if (userName) {
+          Bienvenido, {{ userName }}
+        } @else {
+          Bienvenido
+        }
+      </h1>
+
+      <p class="text-slate-500 text-base">
+        Elige una opción para comenzar.
+      </p>
+    </div>
+
+
+    <!-- Opciones principales -->
+    <div class="grid md:grid-cols-2 gap-6">
+
+      @for (item of menuItems; track item.path) {
+
+        <a
+          [routerLink]="item.path"
+          class="group relative block p-7 bg-white border border-slate-200
+                 rounded-xl shadow-sm transition-all duration-200
+                 hover:-translate-y-1 hover:shadow-lg"
+        >
+
+          <!-- Línea dorada -->
+          <div
+            class="absolute left-0 top-0 h-full w-1 rounded-l-xl
+                   transition-all duration-200 group-hover:w-2"
+            style="background:#c9a227">
+          </div>
+
+
+          <div class="flex items-start justify-between">
+
+            <div>
+
+              <p
+                class="text-xl mb-2"
+                style="font-family:'Cinzel',serif;
+                       font-weight:600;
+                       color:#0f172a">
+                {{ item.title }}
+              </p>
+
+              <p class="text-sm text-slate-500 leading-relaxed">
+                {{ item.description }}
+              </p>
+
+            </div>
+
+
+            <!-- Flecha -->
+            <span
+              class="text-2xl ml-4 transition-transform duration-200
+                     group-hover:translate-x-1"
+              style="color:#c9a227">
+              →
+            </span>
+
+          </div>
+
+        </a>
+
+      }
+
+    </div>
+
+
+    <!-- Separador -->
+    <div class="my-10 border-t" style="border-color:#0f172a18"></div>
+
+
+    <!-- Cerrar sesión -->
+    <button
+      (click)="logout()"
+      class="text-sm text-slate-500 hover:text-red-700
+             transition-colors duration-200">
+      Cerrar sesión
+    </button>
+
+  </div>
+
 </div>
