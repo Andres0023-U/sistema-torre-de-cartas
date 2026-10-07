@@ -3,10 +3,11 @@ import { FormsModule } from '@angular/forms';
 import { TournamentService } from '../../../core/services/tournament';
 import { Tournament } from '../../../models/tournament.model';
 import { RouterLink } from '@angular/router';
+import { StatusLabelPipe } from '../../../shared/pipes/status-label';
 
 @Component({
   selector: 'app-tournament-list',
-  imports: [FormsModule, RouterLink],
+  imports: [FormsModule, RouterLink, StatusLabelPipe],
   templateUrl: './tournament-list.html',
   styleUrl: './tournament-list.css'
 })
@@ -22,6 +23,10 @@ export class TournamentList implements OnInit {
     private tournamentService: TournamentService,
     private cdr: ChangeDetectorRef
   ) {}
+
+  get isOrganizer(): boolean {
+    return localStorage.getItem('role') === 'organizer';
+  }
 
   ngOnInit(): void {
     this.loadTournaments();

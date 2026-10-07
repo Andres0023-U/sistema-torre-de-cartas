@@ -8,7 +8,7 @@
       <!-- Encabezado -->
       <div class="mt-6 mb-10">
         <p class="text-sm uppercase tracking-[0.25em] mb-3" style="color:#b08a18">
-          {{ tournament.status }}
+          {{ tournament.status | statusLabel }}
         </p>
         <h1
           class="text-3xl md:text-4xl mb-3"
@@ -32,8 +32,32 @@
         </div>
       }
 
-      <!-- Torneo sin iniciar: inscripciones -->
-      @if (tournament.status === 'pending') {
+      <!-- Jugadores inscritos (todos los roles) -->
+      <div class="relative overflow-hidden bg-white border border-slate-200 rounded-xl shadow-sm p-6 mb-6">
+        <div class="absolute left-0 top-0 h-full w-1 rounded-l-xl" style="background:#c9a227"></div>
+
+        <h2
+          class="text-lg mb-5"
+          style="font-family:'Cinzel',serif; font-weight:600; color:#0f172a">
+          Jugadores inscritos
+        </h2>
+
+        @for (p of registeredPlayers; track p.playerId) {
+          <div class="py-3 border-b border-slate-100 last:border-0">
+            <p class="text-sm font-medium" style="color:#0f172a">
+              {{ p.name }}
+              <span class="text-slate-400 font-normal">#{{ p.playerId }}</span>
+            </p>
+          </div>
+        }
+
+        @if (registeredPlayers.length === 0) {
+          <p class="text-slate-500 text-sm">Aún no hay jugadores inscritos.</p>
+        }
+      </div>
+
+      <!-- Torneo sin iniciar: inscripciones (solo organizador) -->
+      @if (tournament.status === 'pending' && isOrganizer) {
 
         <div class="relative overflow-hidden bg-white border border-slate-200 rounded-xl shadow-sm p-6 mb-6">
           <div class="absolute left-0 top-0 h-full w-1 rounded-l-xl" style="background:#c9a227"></div>
@@ -82,6 +106,76 @@
         }
       }
 
+      <!-- Jugador con el torneo sin iniciar -->
+      @if (tournament.status === 'pending' && !isOrganizer) {
+        <p class="text-sm text-slate-500">
+          El organizador iniciará el torneo cuando se completen los cupos.
+        </p>
+      }
+
+           <!-- Ranking del torneo -->
+      @if (tournament.status !== 'pending' && ranking) {
+
+        <div class="relative overflow-hidden bg-white border border-slate-200 rounded-xl shadow-sm p-6 mb-6">
+          <div class="absolute left-0 top-0 h-full w-1 rounded-l-xl" style="background:#c9a227"></div>
+
+          <div class="flex items-center justify-between mb-5">
+            <h2
+              class="text-lg"
+              style="font-family:'Cinzel',serif; font-weight:600; color:#0f172a">
+              Ranking
+            </h2>
+            <span
+              class="text-xs uppercase tracking-[0.15em]"
+              style="color:#b08a18">
+              {{ ranking.final ? 'Final' : 'Parcial' }}
+            </span>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+              <thead>
+                <tr class="text-left text-xs text-slate-500 border-b border-slate-200">
+                  <th class="py-2 pr-3 font-medium">Pos.</th>
+                  <th class="py-2 pr-3 font-medium">Jugador</th>
+                  <th class="py-2 pr-3 font-medium text-right">PJ</th>
+                  <th class="py-2 pr-3 font-medium text-right">G</th>
+                  <th class="py-2 pr-3 font-medium text-right">P</th>
+                  <th class="py-2 font-medium text-right">Puntos</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (e of ranking.ranking; track e.playerId) {
+                  <tr
+                    class="border-b border-slate-100 last:border-0"
+                    [style.background]="ranking.final && e.position === 1 ? '#f7f4ed' : null">
+                    <td class="py-3 pr-3 font-semibold" style="color:#b08a18">{{ e.position }}</td>
+                    <td class="py-3 pr-3" style="color:#0f172a">
+                      {{ e.name }}
+                      <span class="text-slate-400">#{{ e.playerId }}</span>
+                      @if (ranking.final && e.position === 1) {
+                        <span class="ml-2 text-xs font-medium" style="color:#b08a18">Campeón</span>
+                      }
+                    </td>
+                    <td class="py-3 pr-3 text-right text-slate-600">{{ e.played }}</td>
+                    <td class="py-3 pr-3 text-right text-slate-600">{{ e.won }}</td>
+                    <td class="py-3 pr-3 text-right text-slate-600">{{ e.lost }}</td>
+                    <td class="py-3 text-right font-medium" style="color:#0f172a">{{ e.points }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+
+          <p class="mt-4 text-xs text-slate-400">
+            PJ: partidas jugadas · G: ganadas · P: perdidas. En eliminación directa la
+            posición depende de la ronda en que cada jugador queda eliminado; entre los
+            eliminados en la misma ronda se ordena por puntos y, si empatan, por la vida
+            acumulada.
+          </p>
+        </div>
+      }
+
       <!-- Torneo iniciado o terminado: rondas -->
       @if (tournament.status === 'in_progress' || tournament.status === 'finished') {
 
@@ -102,7 +196,7 @@
 
               <div>
                 <p class="text-sm font-medium" style="color:#0f172a">{{ r.name }}</p>
-                <p class="text-xs text-slate-500">{{ r.status }}</p>
+                <p class="text-xs text-slate-500">{{ r.status | statusLabel }}</p>
               </div>
 
               <span
@@ -119,8 +213,25 @@
         </div>
       }
 
-    } @else {
+    } @else if (loading) {
+
       <p class="mt-6 text-slate-500 text-sm">Cargando torneo...</p>
+
+    } @else {
+
+      <!-- Torneo ajeno o inexistente -->
+      <div class="mt-6 relative overflow-hidden bg-white border border-slate-200 rounded-xl shadow-sm p-7">
+        <div class="absolute left-0 top-0 h-full w-1 rounded-l-xl" style="background:#c9a227"></div>
+        <p
+          class="text-lg mb-1"
+          style="font-family:'Cinzel',serif; font-weight:600; color:#0f172a">
+          No participas en este torneo
+        </p>
+        <p class="text-sm text-slate-500">
+          No lo encontramos entre tus torneos, o ya no existe.
+        </p>
+      </div>
+
     }
 
   </div>

@@ -4,3 +4,8 @@ export interface PlayerWithUser {
   name: string;
   email: string;
 }
+
+export interface TournamentPlayer {
+  playerId: number;
+  name: string;
+}

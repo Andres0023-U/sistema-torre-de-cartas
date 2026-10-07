@@ -29,6 +29,80 @@
       </div>
     }
 
+    <!-- Mazo del jugador -->
+    @if (isPlayer && deckDataLoaded) {
+
+      @if (canChooseDeck) {
+
+        <div class="relative overflow-hidden bg-white border border-slate-200 rounded-xl shadow-sm p-6 mb-6">
+          <div class="absolute left-0 top-0 h-full w-1 rounded-l-xl" style="background:#c9a227"></div>
+
+          <p
+            class="text-lg mb-1"
+            style="font-family:'Cinzel',serif; font-weight:600; color:#0f172a">
+            Tu mazo para esta ronda
+          </p>
+          <p class="text-sm text-slate-500 mb-5">
+            Puedes cambiarlo hasta que el organizador genere los emparejamientos.
+            Si no cambias nada, juegas con el mazo actual.
+          </p>
+
+          @if (decksLoaded && validDecks.length === 0) {
+            <p class="text-sm text-slate-500">Ninguno de tus mazos tiene 20 cartas todavía.</p>
+          } @else {
+            <div class="flex flex-col sm:flex-row gap-3">
+              <select
+                [(ngModel)]="selectedDeckId"
+                class="flex-1 border border-slate-300 rounded-lg px-4 py-3 text-sm
+                       outline-none bg-slate-50 focus:bg-white focus:border-[#c9a227]
+                       focus:ring-1 focus:ring-[#c9a227] transition-all duration-200">
+                <option [ngValue]="null" disabled>Elige un mazo</option>
+                @for (d of validDecks; track d.deckId) {
+                  <option [ngValue]="d.deckId">{{ d.name }} ({{ deckTotals[d.deckId] }} cartas)</option>
+                }
+              </select>
+
+              <button
+                type="button"
+                (click)="onSaveDeck()"
+                [disabled]="savingDeck || selectedDeckId === null || selectedDeckId === currentDeckId"
+                class="text-white px-6 py-3 rounded-lg font-medium
+                       transition-all duration-200 hover:opacity-90
+                       disabled:opacity-50 disabled:cursor-not-allowed"
+                style="background:#0f172a">
+                Guardar mazo
+              </button>
+            </div>
+          }
+        </div>
+
+      } @else if (notInRound) {
+
+        <div class="relative overflow-hidden bg-white border border-slate-200 rounded-xl shadow-sm p-6 mb-6">
+          <div class="absolute left-0 top-0 h-full w-1 rounded-l-xl" style="background:#c9a227"></div>
+          <p
+            class="text-lg mb-1"
+            style="font-family:'Cinzel',serif; font-weight:600; color:#0f172a">
+            No participas en esta ronda
+          </p>
+          <p class="text-sm text-slate-500">Solo siguen los ganadores de la ronda anterior.</p>
+        </div>
+
+      } @else if (currentDeckId !== null) {
+
+        <div class="relative overflow-hidden bg-white border border-slate-200 rounded-xl shadow-sm p-6 mb-6">
+          <div class="absolute left-0 top-0 h-full w-1 rounded-l-xl" style="background:#c9a227"></div>
+          <p class="text-sm text-slate-500">Juegas esta ronda con</p>
+          <p
+            class="text-lg"
+            style="font-family:'Cinzel',serif; font-weight:600; color:#0f172a">
+            {{ getDeckName(currentDeckId) }}
+          </p>
+        </div>
+
+      }
+    }
+
     <!-- Sin emparejamientos -->
     @if (matches.length === 0) {
 

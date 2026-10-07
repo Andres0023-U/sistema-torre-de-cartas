@@ -1,14 +1,17 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, map } from 'rxjs';
-import { Tournament, TournamentCreate, Round } from '../../models/tournament.model';
+import { Observable, map, catchError, of } from 'rxjs';
+import { Tournament, TournamentCreate, Round, TournamentRanking, GlobalRankingEntry } from '../../models/tournament.model';
+import { TournamentPlayer } from '../../models/player.model';
 import { environment } from '../../../environments/environment';
+
 
 @Injectable({
   providedIn: 'root'
 })
 export class TournamentService {
   private apiUrl = `${environment.apiUrl}/tournaments`;
+  private roundsUrl = `${environment.apiUrl}/rounds`;
 
   constructor(private http: HttpClient) {}
 
@@ -73,4 +76,55 @@ export class TournamentService {
     );
   }
 
+  getTournamentPlayers(tournamentId: number): Observable<TournamentPlayer[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/${tournamentId}/players`).pipe(
+      map(list => list.map(p => ({ playerId: p.player_id, name: p.name })))
+    );
+  }
+
+  getRanking(tournamentId: number): Observable<TournamentRanking> {
+    return this.http.get<any>(`${this.apiUrl}/${tournamentId}/ranking`).pipe(
+      map(r => ({
+        tournamentId: r.tournament_id,
+        final: r.final,
+        ranking: r.ranking.map((e: any) => ({
+          position: e.position,
+          playerId: e.player_id,
+          name: e.name,
+          played: e.played,
+          won: e.won,
+          lost: e.lost,
+          points: e.points,
+          life: e.life,
+          eliminatedRound: e.eliminated_round
+        }))
+      }))
+    );
+  }
+
+  // Mazo que el jugador tiene elegido en una ronda (null si no tiene selección)
+  getMyDeckSelection(roundId: number): Observable<number | null> {
+    return this.http.get<any>(`${this.roundsUrl}/${roundId}/deck-selection`).pipe(
+      map(s => s.deck_id as number),
+      catchError(() => of(null))
+    );
+  }
+
+  selectDeck(roundId: number, deckId: number): Observable<any> {
+    return this.http.post<any>(`${this.roundsUrl}/${roundId}/deck-selection`, { deck_id: deckId });
+  }
+
+  getGlobalRanking(): Observable<GlobalRankingEntry[]> {
+    return this.http.get<any>(`${environment.apiUrl}/ranking/`).pipe(
+      map(res => res.ranking.map((e: any) => ({
+        position: e.position,
+        playerId: e.player_id,
+        name: e.name,
+        played: e.played,
+        won: e.won,
+        lost: e.lost,
+        points: e.points
+      })))
+    );
+  }
 }

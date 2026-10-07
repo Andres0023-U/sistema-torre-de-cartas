@@ -40,9 +40,19 @@ export class Home implements OnInit {
 
   get menuItems() {
     const role = localStorage.getItem('role');
+
+    const tournamentsDescription =
+      role === 'organizer' ? 'Crea y gestiona tus torneos' : 'Ver torneos';
+
     const items = [
-      { path: '/tournaments', title: 'Torneos', description: 'Ver, crear y gestionar torneos' }
+      { path: '/tournaments', title: 'Torneos', description: tournamentsDescription }
     ];
+
+    items.push({
+      path: '/ranking',
+      title: 'Ranking',
+      description: 'Clasificación global de jugadores'
+    });
 
     if (role === 'player') {
       items.push({

@@ -67,3 +67,31 @@ export interface NextRoundResponse {
   championDeckId?: number;
   championPlayerId?: number;
 }
+
+export interface TournamentRankingEntry {
+  position: number;
+  playerId: number;
+  name: string;
+  played: number;
+  won: number;
+  lost: number;
+  points: number;
+  life: number;
+  eliminatedRound: number | null;
+}
+
+export interface TournamentRanking {
+  tournamentId: number;
+  final: boolean;
+  ranking: TournamentRankingEntry[];
+}
+
+export interface GlobalRankingEntry {
+  position: number;
+  playerId: number;
+  name: string;
+  played: number;
+  won: number;
+  lost: number;
+  points: number;
+}

@@ -6,7 +6,8 @@ import { TournamentService } from '../../../core/services/tournament';
 import { Match, Result, Round } from '../../../models/tournament.model';
 import { PlayerService } from '../../../core/services/player';
 import { DeckService } from '../../../core/services/deck';
-import { PlayerWithUser } from '../../../models/player.model';
+import { Deck } from '../../../models/deck.model';
+import { TournamentPlayer } from '../../../models/player.model';
 
 @Component({
   selector: 'app-round-detail',
@@ -22,7 +23,14 @@ export class RoundDetail implements OnInit {
   errorMessage = '';
   successMessage = '';
   playerNames: Record<number, string> = {};
-  private allPlayers: PlayerWithUser[] = [];
+    private allPlayers: TournamentPlayer[] = [];
+  myDecks: Deck[] = [];
+  myDecksLoaded = false;
+  deckTotals: Record<number, number> = {};
+  currentDeckId: number | null = null;   // mazo ya guardado para esta ronda
+  selectedDeckId: number | null = null;  // valor del selector
+  deckDataLoaded = false;
+  savingDeck = false;
 
   tournamentId!: number;
   roundId!: number;
@@ -41,6 +49,32 @@ export class RoundDetail implements OnInit {
     return localStorage.getItem('role') === 'organizer';
   }
 
+  get isPlayer(): boolean {
+    return localStorage.getItem('role') === 'player';
+  }
+
+  get validDecks(): Deck[] {
+    return this.myDecks.filter(d => (this.deckTotals[d.deckId] ?? 0) >= 20);
+  }
+
+  get decksLoaded(): boolean {
+    return this.myDecksLoaded && Object.keys(this.deckTotals).length >= this.myDecks.length;
+  }
+
+  get roundOpenForDeckChange(): boolean {
+    return this.round?.status === 'pending' && this.matches.length === 0;
+  }
+
+  get canChooseDeck(): boolean {
+    return this.isPlayer && this.roundOpenForDeckChange &&
+      (this.currentDeckId !== null || this.round?.number === 1);
+  }
+
+  get notInRound(): boolean {
+    return this.isPlayer && this.deckDataLoaded && this.roundOpenForDeckChange &&
+      this.currentDeckId === null && (this.round?.number ?? 1) > 1;
+  }
+
   get allResultsIn(): boolean {
     return this.matches.length > 0 && this.matches.every(m => this.results[m.matchId]);
   }
@@ -54,10 +88,6 @@ export class RoundDetail implements OnInit {
   }
 
   ngOnInit(): void {
-    this.playerService.getPlayers().subscribe({
-      next: (players) => this.allPlayers = players
-    });
-
     this.route.paramMap.subscribe(params => {
       this.tournamentId = Number(params.get('id'));
       this.roundId = Number(params.get('roundId'));
@@ -65,7 +95,25 @@ export class RoundDetail implements OnInit {
       this.results = {};
       this.forms = {};
       this.round = null;
-      this.load();
+      this.currentDeckId = null;
+      this.selectedDeckId = null;
+      this.deckDataLoaded = false;
+      this.myDecksLoaded = false;
+      this.deckTotals = {};
+      this.playerNames = {};
+      this.allPlayers = [];
+
+      this.tournamentService.getTournamentPlayers(this.tournamentId).subscribe({
+        next: (players) => {
+          this.allPlayers = players;
+          this.load();
+          this.loadMyDeckData();
+        },
+        error: (err) => {
+          this.errorMessage = err.error?.detail || 'No se pudo cargar el torneo';
+          this.cdr.markForCheck();
+        }
+      });
     });
   }
 
@@ -181,6 +229,61 @@ export class RoundDetail implements OnInit {
         this.playerNames[deckId] = player
           ? `${player.name} #${player.playerId}`
           : `Mazo ${deckId}`;
+        this.cdr.markForCheck();
+      }
+    });
+  }
+
+  private loadMyDeckData(): void {
+    if (!this.isPlayer) return;
+
+    this.deckService.getMyDecks().subscribe({
+      next: (decks) => {
+        this.myDecks = decks;
+        this.myDecksLoaded = true;
+        decks.forEach(d => {
+          this.deckService.getDeckCards(d.deckId).subscribe({
+            next: (cards) => {
+              this.deckTotals[d.deckId] = cards.reduce((sum, c) => sum + c.quantity, 0);
+              this.cdr.markForCheck();
+            }
+          });
+        });
+        this.cdr.markForCheck();
+      }
+    });
+
+    this.tournamentService.getMyDeckSelection(this.roundId).subscribe({
+      next: (deckId) => {
+        this.currentDeckId = deckId;
+        this.selectedDeckId = deckId;
+        this.deckDataLoaded = true;
+        this.cdr.markForCheck();
+      }
+    });
+  }
+
+  getDeckName(deckId: number): string {
+    return this.myDecks.find(d => d.deckId === deckId)?.name ?? `Mazo ${deckId}`;
+  }
+
+  onSaveDeck(): void {
+    if (this.selectedDeckId === null) return;
+
+    this.errorMessage = '';
+    this.successMessage = '';
+    this.savingDeck = true;
+
+    this.tournamentService.selectDeck(this.roundId, this.selectedDeckId).subscribe({
+      next: () => {
+        this.currentDeckId = this.selectedDeckId;
+        this.successMessage = 'Mazo guardado para esta ronda';
+        this.savingDeck = false;
+        this.cdr.markForCheck();
+      },
+      error: (err) => {
+        this.errorMessage = err.error?.detail || 'No se pudo guardar el mazo';
+        this.savingDeck = false;
         this.cdr.markForCheck();
       }
     });
