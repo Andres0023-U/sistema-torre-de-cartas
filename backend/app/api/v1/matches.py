@@ -9,6 +9,7 @@ from app.models.matches import Match, Result
 from app.models.tournaments import Round, TournamentRegistration, RoundDeckSelection
 from app.models.players import Deck, DeckCard
 from app.models.tournaments import Round, Tournament, TournamentRegistration, RoundDeckSelection
+from app.core.access import require_tournament_access
 
 router = APIRouter(prefix="/matches", tags=["matches"])
 
@@ -37,10 +38,17 @@ def list_matches(
     db: Session = Depends(get_db),
     payload: dict = Depends(get_current_user_payload)
 ):
-    query = db.query(Match)
-    if round_id:
-        query = query.filter(Match.round_id == round_id)
-    return query.all()
+    if round_id is not None:
+        round_obj = db.query(Round).filter(Round.round_id == round_id).first()
+        if not round_obj:
+            raise HTTPException(status_code=404, detail="Ronda no encontrada")
+        require_tournament_access(db, payload, round_obj.tournament_id)
+        return db.query(Match).filter(Match.round_id == round_id).all()
+
+    if payload.get("role") in ("organizer", "admin"):
+        return db.query(Match).all()
+
+    raise HTTPException(status_code=400, detail="Indica el round_id")
 
 
 def calculate_points(end_phase: str, winner_life: int) -> int:
@@ -82,6 +90,14 @@ def create_result(
 
     winner_is_p1 = data.winner_id == match.deck1_id
     winner_life = data.player1_final_life if winner_is_p1 else data.player2_final_life
+    loser_life = data.player2_final_life if winner_is_p1 else data.player1_final_life
+
+    if data.end_phase == "overtime" and winner_life <= loser_life:
+        raise HTTPException(
+            status_code=400,
+            detail="En overtime el ganador debe terminar con más vida que el perdedor"
+        )
+
     winner_points = calculate_points(data.end_phase, winner_life)
 
     result = Result(
@@ -106,6 +122,13 @@ def get_result(
     db: Session = Depends(get_db),
     payload: dict = Depends(get_current_user_payload)
 ):
+    match = db.query(Match).filter(Match.match_id == match_id).first()
+    if not match:
+        raise HTTPException(status_code=404, detail="Match no encontrado")
+
+    round_obj = db.query(Round).filter(Round.round_id == match.round_id).first()
+    require_tournament_access(db, payload, round_obj.tournament_id)
+
     result = db.query(Result).filter(Result.match_id == match_id).first()
     if not result:
         raise HTTPException(status_code=404, detail="Este match no tiene resultado todavía")

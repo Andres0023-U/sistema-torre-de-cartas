@@ -18,3 +18,10 @@ db.refresh(organizer)
 print(f"Usuario creado: id={organizer.user_id}, email={organizer.email}")
 
 db.close()
+
+"""
+{
+  "email": "organizador@test.com",
+  "password": "123456"
+}
+"""

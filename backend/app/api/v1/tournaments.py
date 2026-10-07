@@ -7,7 +7,10 @@ from app.schemas.tournament import TournamentCreate, TournamentResponse
 from app.models.tournaments import Tournament
 from app.models.matches import Match, Result
 from app.models.tournaments import Round, RoundDeckSelection
-from app.models.players import Deck
+from app.models.players import Deck, Player
+from app.core.access import require_tournament_access
+from pydantic import BaseModel
+from app.models.security import User
 
 router = APIRouter(prefix="/tournaments", tags=["tournaments"])
 
@@ -35,7 +38,30 @@ def list_tournaments(
     db: Session = Depends(get_db),
     payload: dict = Depends(get_current_user_payload)
 ):
-    return db.query(Tournament).all()
+    role = payload.get("role")
+
+    # Organizador y admin ven todos los torneos
+    if role in ("organizer", "admin"):
+        return db.query(Tournament).order_by(Tournament.tournament_id.desc()).all()
+
+    # Jugador: solo los torneos en los que está inscrito
+    if role == "player":
+        player = db.query(Player).filter(Player.user_id == int(payload["sub"])).first()
+        if not player:
+            return []
+        return (
+            db.query(Tournament)
+            .join(
+                TournamentRegistration,
+                TournamentRegistration.tournament_id == Tournament.tournament_id
+            )
+            .filter(TournamentRegistration.player_id == player.player_id)
+            .order_by(Tournament.tournament_id.desc())
+            .all()
+        )
+
+    # Usuarios pendientes: no ven ninguno
+    return []
 
 from app.models.tournaments import TournamentRegistration
 from app.schemas.tournament_registration import RegistrationCreate, RegistrationResponse
@@ -85,12 +111,14 @@ def register_player(
     db.commit()
     db.refresh(registration)
     return registration
+
 @router.get("/{tournament_id}/registrations", response_model=list[RegistrationResponse])
 def list_registrations(
     tournament_id: int,
     db: Session = Depends(get_db),
     payload: dict = Depends(get_current_user_payload)
 ):
+    require_tournament_access(db, payload, tournament_id)
     return db.query(TournamentRegistration).filter(
         TournamentRegistration.tournament_id == tournament_id
     ).all()
@@ -219,4 +247,29 @@ def list_rounds(
     db: Session = Depends(get_db),
     payload: dict = Depends(get_current_user_payload)
 ):
-    return db.query(Round).filter(Round.tournament_id == tournament_id).all()
+    require_tournament_access(db, payload, tournament_id)
+    return db.query(Round).filter(Round.tournament_id == tournament_id) \
+        .order_by(Round.number.asc()).all()
+
+class TournamentPlayerResponse(BaseModel):
+    player_id: int
+    name: str
+
+
+@router.get("/{tournament_id}/players", response_model=list[TournamentPlayerResponse])
+def list_tournament_players(
+    tournament_id: int,
+    db: Session = Depends(get_db),
+    payload: dict = Depends(get_current_user_payload)
+):
+    require_tournament_access(db, payload, tournament_id)
+
+    rows = (
+        db.query(Player, User)
+        .join(TournamentRegistration, TournamentRegistration.player_id == Player.player_id)
+        .join(User, User.user_id == Player.user_id)
+        .filter(TournamentRegistration.tournament_id == tournament_id)
+        .order_by(Player.player_id.asc())
+        .all()
+    )
+    return [TournamentPlayerResponse(player_id=p.player_id, name=u.name) for p, u in rows]

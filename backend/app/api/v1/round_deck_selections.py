@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 from app.core.database import get_db
-from app.core.security import get_current_user_payload
+from app.core.security import require_role
 from app.schemas.round_deck_selection import DeckSelectionCreate, DeckSelectionResponse
 from app.models.tournaments import Round, RoundDeckSelection, TournamentRegistration
 from app.models.matches import Match
@@ -18,7 +18,7 @@ def select_deck_for_round(
     round_id: int,
     data: DeckSelectionCreate,
     db: Session = Depends(get_db),
-    payload: dict = Depends(get_current_user_payload)
+    payload: dict = Depends(require_role(["player"]))
 ):
     player = db.query(Player).filter(Player.user_id == int(payload["sub"])).first()
     if not player:
@@ -77,4 +77,25 @@ def select_deck_for_round(
     db.add(selection)
     db.commit()
     db.refresh(selection)
+    return selection
+
+
+@router.get("/{round_id}/deck-selection", response_model=DeckSelectionResponse)
+def get_my_deck_selection(
+    round_id: int,
+    db: Session = Depends(get_db),
+    payload: dict = Depends(require_role(["player"]))
+):
+    player = db.query(Player).filter(Player.user_id == int(payload["sub"])).first()
+    if not player:
+        raise HTTPException(status_code=404, detail="No tienes perfil de jugador")
+
+    selection = db.query(RoundDeckSelection).filter(
+        RoundDeckSelection.round_id == round_id,
+        RoundDeckSelection.player_id == player.player_id
+    ).first()
+
+    if not selection:
+        raise HTTPException(status_code=404, detail="Todavía no has elegido mazo para esta ronda")
+
     return selection
