@@ -1,0 +1,165 @@
+erDiagram
+    ROLE ||--o{ USER : has
+    USER ||--o| PLAYER : becomes
+    USER ||--o{ TOURNAMENT : organizes
+    USER ||--o{ AUDIT_LOG : performs
+
+    PLAYER ||--o{ DECK : creates
+    PLAYER ||--o{ TOURNAMENT_REGISTRATION : registers
+    PLAYER ||--o{ ROUND_DECK_SELECTION : selects
+    PLAYER ||--o{ RESULT : wins
+
+    TOURNAMENT ||--o{ ROUND : contains
+    TOURNAMENT ||--o{ TOURNAMENT_REGISTRATION : receives
+
+    ROUND ||--o{ ROUND_DECK_SELECTION : allows
+    ROUND ||--o{ MATCH : contains
+
+    DECK ||--o{ DECK_CARD : contains
+    CARD ||--o{ DECK_CARD : belongs_to
+
+    DECK ||--o{ MATCH : deck1
+    DECK ||--o{ MATCH : deck2
+
+    MATCH ||--o{ MATCH_DECK_CARD : contains
+    MATCH ||--o{ MATCH_PLAYER_STATE : has
+    MATCH ||--o| RESULT : produces
+
+    CARD ||--o{ MATCH_DECK_CARD : used_in
+
+    ROLE {
+        int role_id PK
+        string name
+    }
+
+    USER {
+        int user_id PK
+        string name
+        string email
+        string password_hash
+        int role_id FK
+        timestamp created_at
+        timestamp updated_at
+        boolean is_active
+    }
+
+    PLAYER {
+        int player_id PK
+        int user_id FK
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    DECK {
+        int deck_id PK
+        int player_id FK
+        string name
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    CARD {
+        int card_id PK
+        string card_name
+        int value
+        string type
+        string effect
+        int max_quantity
+        string rarity
+        string description
+    }
+
+    DECK_CARD {
+        int deck_id PK
+        int card_id PK
+        int quantity
+    }
+
+    TOURNAMENT {
+        int tournament_id PK
+        string name
+        date date
+        string format
+        int num_players
+        string status
+        int organizer_id FK
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    ROUND {
+        int round_id PK
+        int tournament_id FK
+        int number
+        string name
+        string status
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    TOURNAMENT_REGISTRATION {
+        int tournament_registration_id PK
+        int tournament_id FK
+        int player_id FK
+        timestamp registered_at
+    }
+
+    ROUND_DECK_SELECTION {
+        int round_deck_selection_id PK
+        int round_id FK
+        int player_id FK
+        int deck_id FK
+        timestamp selected_at
+    }
+
+    MATCH {
+        int match_id PK
+        int round_id FK
+        int deck1_id FK
+        int deck2_id FK
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    MATCH_DECK_CARD {
+        int match_deck_card_id PK
+        int match_id FK
+        int card_id FK
+        int player_slot
+        string state
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    MATCH_PLAYER_STATE {
+        int match_id PK
+        int player_slot PK
+        int current_life
+        int current_shield
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    RESULT {
+        int result_id PK
+        int match_id FK
+        int winner_id FK
+        string end_phase
+        int player1_final_life
+        int player2_final_life
+        int player1_points
+        int player2_points
+        timestamp date
+        timestamp created_at
+    }
+
+    AUDIT_LOG {
+        int audit_id PK
+        int user_id FK
+        string action
+        string table_name
+        int record_id
+        json old_values
+        json new_values
+        timestamp created_at
+    }
