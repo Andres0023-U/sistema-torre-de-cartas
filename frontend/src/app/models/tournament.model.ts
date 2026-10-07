@@ -95,3 +95,14 @@ export interface GlobalRankingEntry {
   lost: number;
   points: number;
 }
+
+export interface MyStats {
+  position: number | null;
+  playerId: number;
+  name: string | null;
+  played: number;
+  won: number;
+  lost: number;
+  points: number;
+  tournamentsWon: number;
+}

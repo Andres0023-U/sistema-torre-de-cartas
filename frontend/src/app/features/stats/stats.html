@@ -1,0 +1,53 @@
+<div class="min-h-[calc(100vh-56px)]" style="background:#f7f4ed">
+  <div class="max-w-2xl mx-auto px-6 py-12">
+
+    <a routerLink="/" class="text-sm text-slate-500 hover:underline">← Volver al inicio</a>
+
+    <div class="mt-6 mb-10">
+      <p class="text-sm uppercase tracking-[0.25em] mb-3" style="color:#b08a18">Tu progreso</p>
+      <h1 class="text-3xl md:text-4xl mb-3" style="font-family:'Cinzel',serif; font-weight:700; color:#0f172a">
+        Mis estadísticas
+      </h1>
+    </div>
+
+    @if (stats) {
+      <div class="grid sm:grid-cols-2 gap-4">
+
+        <div class="relative overflow-hidden bg-white border border-slate-200 rounded-xl shadow-sm p-6">
+          <div class="absolute left-0 top-0 h-full w-1 rounded-l-xl" style="background:#c9a227"></div>
+          <p class="text-sm text-slate-500 mb-1">Posición en el ranking</p>
+          <p class="text-3xl" style="font-family:'Cinzel',serif; font-weight:700; color:#0f172a">
+            {{ stats.position ?? '—' }}
+          </p>
+        </div>
+
+        <div class="relative overflow-hidden bg-white border border-slate-200 rounded-xl shadow-sm p-6">
+          <div class="absolute left-0 top-0 h-full w-1 rounded-l-xl" style="background:#c9a227"></div>
+          <p class="text-sm text-slate-500 mb-1">Puntos totales</p>
+          <p class="text-3xl" style="font-family:'Cinzel',serif; font-weight:700; color:#0f172a">
+            {{ stats.points }}
+          </p>
+        </div>
+
+        <div class="relative overflow-hidden bg-white border border-slate-200 rounded-xl shadow-sm p-6">
+          <div class="absolute left-0 top-0 h-full w-1 rounded-l-xl" style="background:#c9a227"></div>
+          <p class="text-sm text-slate-500 mb-1">Partidas jugadas</p>
+          <p class="text-3xl" style="font-family:'Cinzel',serif; font-weight:700; color:#0f172a">
+            {{ stats.played }}
+          </p>
+          <p class="text-xs text-slate-400 mt-1">{{ stats.won }} ganadas · {{ stats.lost }} perdidas</p>
+        </div>
+
+        <div class="relative overflow-hidden bg-white border border-slate-200 rounded-xl shadow-sm p-6">
+          <div class="absolute left-0 top-0 h-full w-1 rounded-l-xl" style="background:#c9a227"></div>
+          <p class="text-sm text-slate-500 mb-1">Torneos ganados</p>
+          <p class="text-3xl" style="font-family:'Cinzel',serif; font-weight:700; color:#0f172a">
+            {{ stats.tournamentsWon }}
+          </p>
+        </div>
+
+      </div>
+    }
+
+  </div>
+</div>

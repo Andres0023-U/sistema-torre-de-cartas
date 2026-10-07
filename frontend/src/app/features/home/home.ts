@@ -60,7 +60,15 @@ export class Home implements OnInit {
         title: 'Mis mazos',
         description: 'Construye y edita tus mazos de combate'
       });
+
+      items.push({
+        path: '/stats',
+        title: 'Mis estadísticas',
+        description: 'Tu progreso, puntos y torneos ganados'
+      });
     }
+
+
 
     if (role === 'admin') {
       items.unshift({

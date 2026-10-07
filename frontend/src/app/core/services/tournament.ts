@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, map, catchError, of } from 'rxjs';
-import { Tournament, TournamentCreate, Round, TournamentRanking, GlobalRankingEntry } from '../../models/tournament.model';
+import { Tournament, TournamentCreate, Round, TournamentRanking, GlobalRankingEntry, MyStats } from '../../models/tournament.model';
 import { TournamentPlayer } from '../../models/player.model';
 import { environment } from '../../../environments/environment';
 
@@ -125,6 +125,21 @@ export class TournamentService {
         lost: e.lost,
         points: e.points
       })))
+    );
+  }
+
+  getMyStats(): Observable<MyStats> {
+    return this.http.get<any>(`${environment.apiUrl}/ranking/me`).pipe(
+      map(s => ({
+        position: s.position,
+        playerId: s.player_id,
+        name: s.name,
+        played: s.played,
+        won: s.won,
+        lost: s.lost,
+        points: s.points,
+        tournamentsWon: s.tournaments_won
+      }))
     );
   }
 }
