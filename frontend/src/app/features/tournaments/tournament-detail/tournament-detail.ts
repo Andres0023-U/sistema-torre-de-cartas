@@ -32,7 +32,8 @@ export class TournamentDetail implements OnInit {
   ) {}
 
   get isOrganizer(): boolean {
-    return localStorage.getItem('role') === 'organizer';
+    const role = localStorage.getItem('role');
+    return role === 'organizer' || role === 'admin';
   }
 
   get registeredIds(): number[] {

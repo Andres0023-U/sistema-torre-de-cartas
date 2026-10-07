@@ -25,7 +25,8 @@ export class TournamentList implements OnInit {
   ) {}
 
   get isOrganizer(): boolean {
-    return localStorage.getItem('role') === 'organizer';
+    const role = localStorage.getItem('role');
+    return role === 'organizer' || role === 'admin';
   }
 
   ngOnInit(): void {
@@ -71,4 +72,18 @@ export class TournamentList implements OnInit {
       }
     });
   }
+
+  statusFilter: 'all' | 'pending' | 'in_progress' | 'finished' = 'all';
+
+  get filteredTournaments(): Tournament[] {
+    if (this.statusFilter === 'all') return this.tournaments;
+    return this.tournaments.filter(t => t.status === this.statusFilter);
+  }
+
+  setStatusFilter(value: string): void {
+    if (value === 'all' || value === 'pending' || value === 'in_progress' || value === 'finished') {
+      this.statusFilter = value;
+    }
+  }
+
 }

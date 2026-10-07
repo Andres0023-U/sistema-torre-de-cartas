@@ -1,0 +1,84 @@
+<div class="min-h-[calc(100vh-56px)]" style="background:#f7f4ed">
+  <div class="max-w-xl mx-auto px-6 py-12">
+
+    <a routerLink="/" class="text-sm text-slate-500 hover:underline">← Volver al inicio</a>
+
+    <div class="mt-6 mb-10">
+      <p class="text-sm uppercase tracking-[0.25em] mb-3" style="color:#b08a18">
+        {{ roleLabel }}
+      </p>
+      <h1
+        class="text-3xl md:text-4xl mb-3"
+        style="font-family:'Cinzel',serif; font-weight:700; color:#0f172a">
+        Mi cuenta
+      </h1>
+      <p class="text-slate-500 text-base">
+        Cambia el nombre con el que apareces en los torneos y rankings.
+      </p>
+    </div>
+
+    <form
+      (ngSubmit)="onSubmit()"
+      class="relative overflow-hidden bg-white border border-slate-200 rounded-xl shadow-sm p-6">
+
+      <div class="absolute left-0 top-0 h-full w-1 rounded-l-xl" style="background:#c9a227"></div>
+
+      <div class="mb-5">
+        <label
+          class="block mb-2 text-sm font-medium"
+          [class.text-slate-600]="!nameError"
+          [class.text-red-700]="nameError">
+          Nombre
+          @if (nameError) {
+            <span class="text-red-600"> *</span>
+          }
+        </label>
+
+        <input
+          type="text"
+          [(ngModel)]="name"
+          name="name"
+          maxlength="20"
+          [attr.aria-invalid]="!!nameError"
+          [style.border-color]="nameError ? '#f87171' : null"
+          [style.background]="nameError ? '#fef2f2' : null"
+          class="w-full border border-slate-300 rounded-lg px-4 py-3
+                 outline-none bg-slate-50
+                 focus:bg-white focus:border-[#c9a227]
+                 focus:ring-1 focus:ring-[#c9a227]
+                 transition-all duration-200">
+
+        @if (nameError) {
+          <p class="mt-2 text-xs text-red-600">{{ nameError }}</p>
+        } @else {
+          <p class="mt-2 text-xs text-slate-400">
+            Máximo 20 caracteres. Otras personas pueden tener el mismo nombre;
+            en los torneos se distingue por el número #id.
+          </p>
+        }
+      </div>
+
+      @if (successMessage) {
+        <div class="mb-5 px-4 py-3 rounded-lg bg-green-50 border border-green-200">
+          <p class="text-green-700 text-sm">{{ successMessage }}</p>
+        </div>
+      }
+      @if (errorMessage) {
+        <div class="mb-5 px-4 py-3 rounded-lg bg-red-50 border border-red-200">
+          <p class="text-red-700 text-sm">{{ errorMessage }}</p>
+        </div>
+      }
+
+      <button
+        type="submit"
+        [disabled]="saving || unchanged"
+        class="text-white px-6 py-3 rounded-lg font-medium
+               transition-all duration-200 hover:opacity-90 hover:shadow-md
+               active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed"
+        style="background:#0f172a">
+        Guardar cambios
+      </button>
+    </form>
+
+  </div>
+</div>

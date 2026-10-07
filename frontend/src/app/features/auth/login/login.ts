@@ -42,9 +42,13 @@ export class Login {
         this.router.navigate(['/']);
       },
       error: (err) => {
-        this.errorMessage = err.status === 0
-          ? 'No se pudo conectar con el servidor. Intenta de nuevo en unos segundos.'
-          : 'Correo o contraseña incorrectos';
+        if (err.status === 0) {
+          this.errorMessage = 'No se pudo conectar con el servidor. Intenta de nuevo en unos segundos.';
+        } else if (err.status === 403) {
+          this.errorMessage = err.error?.detail || 'Tu cuenta está desactivada.';
+        } else {
+          this.errorMessage = 'Correo o contraseña incorrectos';
+        }
         this.cdr.markForCheck();
       }
     });

@@ -13,6 +13,7 @@ from app.api.v1.matches import router as matches_router
 from app.api.v1.cards import router as cards_router
 from app.api.v1.ranking import router as ranking_router
 from app.api.v1.global_ranking import router as global_ranking_router
+from app.api.v1.history import router as history_router
 
 app = FastAPI(title="Torre de Cartas API")
 
@@ -36,6 +37,7 @@ app.include_router(matches_router)
 app.include_router(cards_router)
 app.include_router(ranking_router)
 app.include_router(global_ranking_router)
+app.include_router(history_router)
 
 
 @app.get("/")

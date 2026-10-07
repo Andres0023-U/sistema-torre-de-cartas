@@ -42,13 +42,13 @@ def get_my_player(
 @router.get("/", response_model=list[PlayerWithUserResponse])
 def list_players(
     db: Session = Depends(get_db),
-    payload: dict = Depends(require_role(["organizer"]))
+    payload: dict = Depends(require_role(["organizer", "admin"]))
 ):
     results = (
         db.query(Player, User)
         .join(User, Player.user_id == User.user_id)
         .join(Role, Role.role_id == User.role_id)
-        .filter(Role.name == "player")
+                .filter(Role.name == "player", User.is_active.is_(True))
         .all()
     )
     return [

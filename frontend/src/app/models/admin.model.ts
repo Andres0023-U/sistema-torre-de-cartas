@@ -5,3 +5,11 @@ export interface PendingUser {
 }
 
 export type AssignableRole = 'organizer' | 'player';
+
+export interface AdminUser {
+  userId: number;
+  name: string;
+  email: string;
+  role: string;
+  isActive: boolean;
+}

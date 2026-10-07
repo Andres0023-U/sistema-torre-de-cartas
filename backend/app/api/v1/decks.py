@@ -33,8 +33,12 @@ def create_deck(
     db: Session = Depends(get_db),
     payload: dict = Depends(require_role(["player"]))
 ):
+    name = data.name.strip()
+    if not name:
+        raise HTTPException(status_code=400, detail="El nombre del mazo no puede estar vacío")
+
     player = get_player_or_404(int(payload["sub"]), db)
-    deck = Deck(player_id=player.player_id, name=data.name)
+    deck = Deck(player_id=player.player_id, name=name)
     db.add(deck)
     db.commit()
     db.refresh(deck)

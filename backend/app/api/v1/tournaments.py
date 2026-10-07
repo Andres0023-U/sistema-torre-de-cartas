@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 from app.core.database import get_db
-from app.core.security import require_role, get_current_user_payload
+from app.core.security import require_role, get_current_user_payload, MANAGER_ROLES, can_manage_tournament
 from app.schemas.tournament import TournamentCreate, TournamentResponse
 from app.models.tournaments import Tournament
 from app.models.matches import Match, Result
@@ -18,7 +18,7 @@ router = APIRouter(prefix="/tournaments", tags=["tournaments"])
 def create_tournament(
     data: TournamentCreate,
     db: Session = Depends(get_db),
-    payload: dict = Depends(require_role(["organizer"]))
+    payload: dict = Depends(require_role(MANAGER_ROLES))
 ):
     new_tournament = Tournament(
         name=data.name,
@@ -77,13 +77,13 @@ def register_player(
     tournament_id: int,
     data: RegistrationCreate,
     db: Session = Depends(get_db),
-    payload: dict = Depends(require_role(["organizer"]))
+    payload: dict = Depends(require_role(MANAGER_ROLES))
 ):
     tournament = db.query(Tournament).filter(Tournament.tournament_id == tournament_id).first()
     if not tournament:
         raise HTTPException(status_code=404, detail="Torneo no encontrado")
 
-    if tournament.organizer_id != int(payload["sub"]):
+    if not can_manage_tournament(payload, tournament):
         raise HTTPException(status_code=403, detail="Solo el organizador del torneo puede inscribir jugadores")
 
     if tournament.status != "pending":
@@ -127,13 +127,13 @@ def list_registrations(
 def start_tournament(
     tournament_id: int,
     db: Session = Depends(get_db),
-    payload: dict = Depends(require_role(["organizer"]))
+    payload: dict = Depends(require_role(MANAGER_ROLES))
 ):
     tournament = db.query(Tournament).filter(Tournament.tournament_id == tournament_id).first()
     if not tournament:
         raise HTTPException(status_code=404, detail="Torneo no encontrado")
 
-    if tournament.organizer_id != int(payload["sub"]):
+    if not can_manage_tournament(payload, tournament):
         raise HTTPException(status_code=403, detail="Solo el organizador del torneo puede iniciarlo")
 
     if tournament.status != "pending":
@@ -169,12 +169,12 @@ def start_tournament(
 def next_round(
     tournament_id: int,
     db: Session = Depends(get_db),
-    payload: dict = Depends(require_role(["organizer"]))
+    payload: dict = Depends(require_role(MANAGER_ROLES))
 ):
     tournament = db.query(Tournament).filter(Tournament.tournament_id == tournament_id).first()
     if not tournament:
         raise HTTPException(status_code=404, detail="Torneo no encontrado")
-    if tournament.organizer_id != int(payload["sub"]):
+    if not can_manage_tournament(payload, tournament):
         raise HTTPException(status_code=403, detail="Solo el organizador del torneo puede avanzar de ronda")
     if tournament.status != "in_progress":
         raise HTTPException(status_code=400, detail="El torneo no está en curso")

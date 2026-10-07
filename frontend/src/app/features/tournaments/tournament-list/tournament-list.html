@@ -106,8 +106,27 @@
 
     }
 
+    <div class="flex gap-2 mb-6">
+      @for (f of [
+        { value: 'all', label: 'Todos' },
+        { value: 'pending', label: 'Pendiente' },
+        { value: 'in_progress', label: 'En curso' },
+        { value: 'finished', label: 'Finalizado' }
+      ]; track f.value) {
+        <button
+          type="button"
+          (click)="setStatusFilter(f.value)"
+          class="text-sm px-3 py-1.5 rounded-lg border transition-colors"
+          [style.background]="statusFilter === f.value ? '#0f172a' : 'white'"
+          [style.color]="statusFilter === f.value ? 'white' : '#0f172a'"
+          [style.borderColor]="statusFilter === f.value ? '#0f172a' : '#cbd5e1'">
+          {{ f.label }}
+        </button>
+      }
+    </div>
+
     <!-- Lista -->
-    @if (tournaments.length === 0) {
+    @if (filteredTournaments.length === 0) {
 
       <div class="relative overflow-hidden bg-white border border-slate-200 rounded-xl shadow-sm p-7">
         <div class="absolute left-0 top-0 h-full w-1 rounded-l-xl" style="background:#c9a227"></div>
@@ -124,7 +143,7 @@
     } @else {
 
       <div class="space-y-4">
-        @for (t of tournaments; track t.tournamentId) {
+        @for (t of filteredTournaments; track t.tournamentId) {
 
           <a
             [routerLink]="['/tournaments', t.tournamentId]"

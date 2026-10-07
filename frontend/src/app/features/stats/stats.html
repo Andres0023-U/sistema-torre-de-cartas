@@ -1,5 +1,5 @@
 <div class="min-h-[calc(100vh-56px)]" style="background:#f7f4ed">
-  <div class="max-w-2xl mx-auto px-6 py-12">
+  <div class="max-w-3xl mx-auto px-6 py-12">
 
     <a routerLink="/" class="text-sm text-slate-500 hover:underline">← Volver al inicio</a>
 
@@ -11,7 +11,7 @@
     </div>
 
     @if (stats) {
-      <div class="grid sm:grid-cols-2 gap-4">
+      <div class="grid sm:grid-cols-2 gap-4 mb-10">
 
         <div class="relative overflow-hidden bg-white border border-slate-200 rounded-xl shadow-sm p-6">
           <div class="absolute left-0 top-0 h-full w-1 rounded-l-xl" style="background:#c9a227"></div>
@@ -44,10 +44,65 @@
           <p class="text-3xl" style="font-family:'Cinzel',serif; font-weight:700; color:#0f172a">
             {{ stats.tournamentsWon }}
           </p>
+          @if (historyLoaded) {
+            <p class="text-xs text-slate-400 mt-1">de {{ tournamentsPlayed }} jugados</p>
+          }
         </div>
 
       </div>
     }
+
+    <!-- Historial -->
+    <div class="relative overflow-hidden bg-white border border-slate-200 rounded-xl shadow-sm p-6">
+      <div class="absolute left-0 top-0 h-full w-1 rounded-l-xl" style="background:#c9a227"></div>
+
+      <h2
+        class="text-lg mb-5"
+        style="font-family:'Cinzel',serif; font-weight:600; color:#0f172a">
+        Historial de partidas
+      </h2>
+
+      @if (!historyLoaded) {
+        <p class="text-sm text-slate-500">Cargando historial...</p>
+      } @else if (history.length === 0) {
+        <p class="text-sm text-slate-500">Aún no tienes partidas con resultado.</p>
+      } @else {
+
+        @for (h of history; track h.matchId) {
+          <div class="flex items-center justify-between gap-4 py-3 border-b border-slate-100 last:border-0">
+
+            <div>
+              <p class="text-sm font-medium" style="color:#0f172a">
+                {{ h.tournamentName }}
+                <span class="text-slate-400 font-normal">· {{ h.roundName }}</span>
+              </p>
+              <p class="text-xs text-slate-500 mt-1">
+                vs
+                @if (h.opponentName) {
+                  {{ h.opponentName }} <span class="text-slate-400">#{{ h.opponentPlayerId }}</span>
+                } @else {
+                  rival desconocido
+                }
+                · {{ h.endPhase === 'overtime' ? 'Overtime' : 'Fase normal' }}
+                · {{ h.date | date:'dd/MM/yyyy' }}
+              </p>
+            </div>
+
+            <div class="text-right shrink-0">
+              <p
+                class="text-sm font-medium"
+                [class.text-green-700]="h.won"
+                [class.text-red-700]="!h.won">
+                {{ h.won ? 'Victoria' : 'Derrota' }}
+              </p>
+              <p class="text-xs text-slate-500 mt-1">{{ h.points }} pts</p>
+            </div>
+
+          </div>
+        }
+
+      }
+    </div>
 
   </div>
 </div>

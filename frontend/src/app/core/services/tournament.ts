@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, map, catchError, of } from 'rxjs';
-import { Tournament, TournamentCreate, Round, TournamentRanking, GlobalRankingEntry, MyStats } from '../../models/tournament.model';
+import { Tournament, TournamentCreate, Round, TournamentRanking, GlobalRankingEntry, MyStats, HistoryEntry } from '../../models/tournament.model';
 import { TournamentPlayer } from '../../models/player.model';
 import { environment } from '../../../environments/environment';
 
@@ -99,6 +99,24 @@ export class TournamentService {
           eliminatedRound: e.eliminated_round
         }))
       }))
+    );
+  }
+
+  getMyHistory(): Observable<HistoryEntry[]> {
+    return this.http.get<any[]>(`${environment.apiUrl}/players/me/history`).pipe(
+      map(list => list.map(h => ({
+        matchId: h.match_id,
+        tournamentId: h.tournament_id,
+        tournamentName: h.tournament_name,
+        roundNumber: h.round_number,
+        roundName: h.round_name,
+        opponentPlayerId: h.opponent_player_id,
+        opponentName: h.opponent_name,
+        won: h.won,
+        points: h.points,
+        endPhase: h.end_phase,
+        date: h.date
+      })))
     );
   }
 

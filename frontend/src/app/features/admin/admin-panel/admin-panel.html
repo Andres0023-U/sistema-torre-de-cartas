@@ -11,10 +11,10 @@
       <h1
         class="text-3xl md:text-4xl mb-3"
         style="font-family:'Cinzel',serif; font-weight:700; color:#0f172a">
-        Usuarios pendientes
+        Usuarios
       </h1>
       <p class="text-slate-500 text-base">
-        Asigna un rol a los usuarios que se acaban de registrar.
+        Aprueba a los usuarios nuevos y activa o desactiva cuentas.
       </p>
     </div>
 
@@ -31,26 +31,27 @@
       </div>
     }
 
-    <!-- Contenido -->
+    <!-- Pendientes -->
+    <h2
+      class="text-xl mb-4"
+      style="font-family:'Cinzel',serif; font-weight:600; color:#0f172a">
+      Pendientes de aprobación
+    </h2>
+
     @if (loading) {
-      <p class="text-slate-500 text-sm">Cargando usuarios...</p>
+      <p class="text-slate-500 text-sm mb-10">Cargando usuarios...</p>
     } @else if (users.length === 0) {
 
-      <div class="relative overflow-hidden bg-white border border-slate-200 rounded-xl shadow-sm p-7">
+      <div class="relative overflow-hidden bg-white border border-slate-200 rounded-xl shadow-sm p-6 mb-10">
         <div class="absolute left-0 top-0 h-full w-1 rounded-l-xl" style="background:#c9a227"></div>
-        <p
-          class="text-lg mb-1"
-          style="font-family:'Cinzel',serif; font-weight:600; color:#0f172a">
-          No hay usuarios pendientes
-        </p>
         <p class="text-sm text-slate-500">
-          Cuando alguien se registre, aparecerá aquí.
+          No hay usuarios pendientes. Cuando alguien se registre, aparecerá aquí.
         </p>
       </div>
 
     } @else {
 
-      <div class="space-y-4">
+      <div class="space-y-4 mb-10">
         @for (user of users; track user.userId) {
 
           <div class="relative overflow-hidden bg-white border border-slate-200 rounded-xl shadow-sm p-6">
@@ -94,6 +95,61 @@
             </div>
           </div>
 
+        }
+      </div>
+
+    }
+
+    <!-- Todos los usuarios -->
+    <h2
+      class="text-xl mb-4"
+      style="font-family:'Cinzel',serif; font-weight:600; color:#0f172a">
+      Todos los usuarios
+    </h2>
+
+    @if (usersLoading) {
+      <p class="text-slate-500 text-sm">Cargando usuarios...</p>
+    } @else {
+
+      <div class="relative overflow-hidden bg-white border border-slate-200 rounded-xl shadow-sm p-6">
+        <div class="absolute left-0 top-0 h-full w-1 rounded-l-xl" style="background:#c9a227"></div>
+
+        @for (u of allUsers; track u.userId) {
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3
+                      py-3 border-b border-slate-100 last:border-0">
+
+            <div>
+              <p class="text-sm font-medium" [style.color]="u.isActive ? '#0f172a' : '#94a3b8'">
+                {{ u.name }}
+                <span class="text-slate-400 font-normal">#{{ u.userId }}</span>
+              </p>
+              <p class="text-xs text-slate-500">
+                {{ u.email }} · {{ roleLabel(u.role) }}
+                @if (!u.isActive) {
+                  <span class="text-red-600 font-medium"> · Desactivada</span>
+                }
+              </p>
+            </div>
+
+            <button
+              type="button"
+              (click)="toggleActive(u)"
+              [disabled]="togglingId === u.userId"
+              class="text-sm px-4 py-2 rounded-lg font-medium border
+                     transition-all duration-200 hover:bg-slate-50
+                     disabled:opacity-50 disabled:cursor-not-allowed"
+              [class.text-red-700]="u.isActive"
+              [class.border-red-200]="u.isActive"
+              [style.color]="u.isActive ? null : '#0f172a'"
+              [style.border-color]="u.isActive ? null : '#c9a227'">
+              {{ u.isActive ? 'Desactivar' : 'Reactivar' }}
+            </button>
+
+          </div>
+        }
+
+        @if (allUsers.length === 0) {
+          <p class="text-slate-500 text-sm">No hay usuarios.</p>
         }
       </div>
 

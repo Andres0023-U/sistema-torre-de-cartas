@@ -42,7 +42,7 @@ export class Home implements OnInit {
     const role = localStorage.getItem('role');
 
     const tournamentsDescription =
-      role === 'organizer' ? 'Crea y gestiona tus torneos' : 'Ver torneos';
+      role === 'organizer' || role === 'admin' ? 'Crea y gestiona tus torneos' : 'Ver torneos';
 
     const items = [
       { path: '/tournaments', title: 'Torneos', description: tournamentsDescription }
@@ -68,7 +68,11 @@ export class Home implements OnInit {
       });
     }
 
-
+    items.push({
+      path: '/account',
+      title: 'Mi cuenta',
+      description: 'Cambia tu nombre de usuario'
+    });
 
     if (role === 'admin') {
       items.unshift({

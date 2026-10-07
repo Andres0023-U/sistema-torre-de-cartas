@@ -20,3 +20,18 @@ db.refresh(admin)
 print(f"Admin creado: id={admin.user_id}, email={admin.email}")
 
 db.close()
+
+"""
+Nube
+{
+  "email": "admin@test.com",
+  "password": "admin1234"
+}
+"""
+"""
+Local 
+{
+  "email": "admin@demo.com",
+  "password": "Demo1234"
+}
+"""

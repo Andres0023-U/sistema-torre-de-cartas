@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import func
 from datetime import datetime, timezone
 from app.core.database import get_db
-from app.core.security import require_role, get_current_user_payload
+from app.core.security import require_role, get_current_user_payload, MANAGER_ROLES, can_manage_tournament
 from app.schemas.match import MatchCreate, MatchResponse, ResultCreate, ResultResponse
 from app.models.matches import Match, Result
 from app.models.tournaments import Round, TournamentRegistration, RoundDeckSelection
@@ -14,13 +14,13 @@ from app.core.access import require_tournament_access
 router = APIRouter(prefix="/matches", tags=["matches"])
 
 MIN_CARDS = 20
-
+ 
 
 @router.post("/", response_model=MatchResponse)
 def create_match(
     data: MatchCreate,
     db: Session = Depends(get_db),
-    payload: dict = Depends(require_role(["organizer"]))
+    payload: dict = Depends(require_role(MANAGER_ROLES))
 ):
     if data.deck1_id == data.deck2_id:
         raise HTTPException(status_code=400, detail="Un mazo no puede enfrentarse a sí mismo")
@@ -64,7 +64,7 @@ def create_result(
     match_id: int,
     data: ResultCreate,
     db: Session = Depends(get_db),
-    payload: dict = Depends(require_role(["organizer"]))
+    payload: dict = Depends(require_role(MANAGER_ROLES))
 ):
     match = db.query(Match).filter(Match.match_id == match_id).first()
     if not match:
@@ -75,7 +75,7 @@ def create_result(
         Tournament.tournament_id == round_obj.tournament_id
     ).first()
 
-    if tournament.organizer_id != int(payload["sub"]):
+    if not can_manage_tournament(payload, tournament):
         raise HTTPException(status_code=403, detail="Solo el organizador del torneo puede registrar resultados")
 
     if tournament.status != "in_progress":
@@ -92,10 +92,10 @@ def create_result(
     winner_life = data.player1_final_life if winner_is_p1 else data.player2_final_life
     loser_life = data.player2_final_life if winner_is_p1 else data.player1_final_life
 
-    if data.end_phase == "overtime" and winner_life <= loser_life:
+    if winner_life <= loser_life:
         raise HTTPException(
             status_code=400,
-            detail="En overtime el ganador debe terminar con más vida que el perdedor"
+            detail="El ganador debe terminar con más vida que el perdedor"
         )
 
     winner_points = calculate_points(data.end_phase, winner_life)
@@ -139,7 +139,7 @@ def get_result(
 def generate_matches(
     round_id: int,
     db: Session = Depends(get_db),
-    payload: dict = Depends(require_role(["organizer"]))
+    payload: dict = Depends(require_role(MANAGER_ROLES))
 ):
     round_obj = db.query(Round).filter(Round.round_id == round_id).first()
     if not round_obj:
@@ -149,7 +149,7 @@ def generate_matches(
         Tournament.tournament_id == round_obj.tournament_id
     ).first()
 
-    if tournament.organizer_id != int(payload["sub"]):
+    if not can_manage_tournament(payload, tournament):
         raise HTTPException(status_code=403, detail="Solo el organizador del torneo puede generar emparejamientos")
 
     if tournament.status != "in_progress":

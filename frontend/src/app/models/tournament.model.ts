@@ -106,3 +106,17 @@ export interface MyStats {
   points: number;
   tournamentsWon: number;
 }
+
+export interface HistoryEntry {
+  matchId: number;
+  tournamentId: number;
+  tournamentName: string;
+  roundNumber: number;
+  roundName: string;
+  opponentPlayerId: number | null;
+  opponentName: string | null;
+  won: boolean;
+  points: number;
+  endPhase: string;
+  date: string;
+}
