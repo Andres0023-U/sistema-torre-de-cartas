@@ -1,8 +1,8 @@
 from functools import cmp_to_key
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.core.database import get_db
-from app.core.security import get_current_user_payload
+from app.core.security import get_current_user_payload, require_role
 from app.models.matches import Match, Result
 from app.models.players import Deck, Player
 from app.models.security import User
@@ -110,3 +110,50 @@ def global_ranking(
         prev_entry = e
 
     return {"ranking": ranking}
+
+@router.get("/me")
+def my_stats(
+    db: Session = Depends(get_db),
+    payload: dict = Depends(require_role(["player"]))
+):
+    from app.models.tournaments import Round, Tournament
+
+    player = db.query(Player).filter(Player.user_id == int(payload["sub"])).first()
+    if not player:
+        raise HTTPException(status_code=404, detail="No tienes perfil de jugador")
+
+    full_ranking = global_ranking(db=db, payload=payload)["ranking"]
+    my_entry = next((e for e in full_ranking if e["player_id"] == player.player_id), None)
+
+    if not my_entry:
+        my_entry = {
+            "player_id": player.player_id, "name": None, "position": None,
+            "played": 0, "won": 0, "lost": 0, "points": 0, "last_result_date": None
+        }
+
+    finished_tournaments = db.query(Tournament).filter(Tournament.status == "finished").all()
+    tournaments_won = 0
+
+    for t in finished_tournaments:
+        last_round = (
+            db.query(Round)
+            .filter(Round.tournament_id == t.tournament_id)
+            .order_by(Round.number.desc())
+            .first()
+        )
+        if not last_round:
+            continue
+
+        final_match = db.query(Match).filter(Match.round_id == last_round.round_id).first()
+        if not final_match:
+            continue
+
+        result = db.query(Result).filter(Result.match_id == final_match.match_id).first()
+        if not result:
+            continue
+
+        winner_deck = db.query(Deck).filter(Deck.deck_id == result.winner_id).first()
+        if winner_deck and winner_deck.player_id == player.player_id:
+            tournaments_won += 1
+
+    return {**my_entry, "tournaments_won": tournaments_won}

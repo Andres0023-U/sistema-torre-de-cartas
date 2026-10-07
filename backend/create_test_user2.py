@@ -20,3 +20,10 @@ db.refresh(new_user)
 print(f"Usuario creado: id={new_user.user_id}, email={new_user.email}")
 
 db.close()
+
+"""
+{
+  "email": "jugadorprueba2@test.com",
+  "password": "Clave1234"
+}
+"""
