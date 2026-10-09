@@ -27,8 +27,8 @@ export class Account implements OnInit {
     const role = localStorage.getItem('role');
     if (role === 'organizer') return 'Organizador';
     if (role === 'admin') return 'Administrador';
-    if (role === 'pending') return 'Pendiente de aprobación';
-    return 'Jugador';
+    if (role === 'player') return 'Jugador';
+    return 'Pendiente de aprobación';
   }
 
   get nameError(): string {
