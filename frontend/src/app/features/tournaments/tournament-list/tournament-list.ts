@@ -86,4 +86,37 @@ export class TournamentList implements OnInit {
     }
   }
 
+  showForm = false;
+
+  readonly filters: { value: string; label: string }[] = [
+    { value: 'all', label: 'Todos' },
+    { value: 'pending', label: 'Pendiente' },
+    { value: 'in_progress', label: 'En curso' },
+    { value: 'finished', label: 'Finalizado' }
+  ];
+
+  countByStatus(value: string): number {
+    if (value === 'all') return this.tournaments.length;
+    return this.tournaments.filter(t => t.status === value).length;
+  }
+
+  badgeClass(status: string): string {
+    switch (status) {
+      case 'pending':
+        return 'bg-amber-100 text-amber-800';
+      case 'in_progress':
+        return 'bg-emerald-100 text-emerald-800';
+      case 'finished':
+        return 'bg-slate-200 text-slate-700';
+      default:
+        return 'bg-slate-100 text-slate-600';
+    }
+  }
+
+  formatDate(date: string): string {
+    const d = new Date(date + 'T00:00:00');
+    if (isNaN(d.getTime())) return date;
+    return d.toLocaleDateString('es-CO', { day: 'numeric', month: 'short', year: 'numeric' });
+  }
+
 }

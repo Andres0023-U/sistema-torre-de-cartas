@@ -4,30 +4,57 @@
     <a routerLink="/" class="text-sm text-slate-500 hover:underline">← Volver al inicio</a>
 
     <!-- Encabezado -->
-    <div class="mt-6 mb-10">
-      <p class="text-sm uppercase tracking-[0.25em] mb-3" style="color:#b08a18">
-        Competencia
-      </p>
-      <h1
-        class="text-3xl md:text-4xl mb-3"
-        style="font-family:'Cinzel',serif; font-weight:700; color:#0f172a">
-        Torneos
-      </h1>
-      <p class="text-slate-500 text-base">
-        @if (isOrganizer) {
-          Consulta tus torneos o crea uno nuevo.
-        } @else {
-          Consulta los torneos disponibles.
-        }
-      </p>
+    <div class="mt-6 mb-8 flex items-end justify-between gap-4">
+      <div>
+        <p class="text-sm uppercase tracking-[0.25em] mb-3" style="color:#b08a18">
+          Competencia
+        </p>
+        <h1
+          class="text-3xl md:text-4xl mb-2"
+          style="font-family:'Cinzel',serif; font-weight:700; color:#0f172a">
+          Torneos
+        </h1>
+        <p class="text-slate-500 text-base">
+          @if (isOrganizer) {
+            Consulta tus torneos o crea uno nuevo.
+          } @else {
+            Consulta los torneos disponibles.
+          }
+        </p>
+      </div>
+
+      @if (isOrganizer) {
+        <button
+          type="button"
+          (click)="showForm = !showForm"
+          class="shrink-0 px-5 py-2.5 rounded-lg text-sm font-medium border
+                 transition-all duration-200 hover:shadow-md active:scale-[0.98]"
+          [style.background]="showForm ? 'white' : '#0f172a'"
+          [style.color]="showForm ? '#0f172a' : 'white'"
+          [style.borderColor]="'#0f172a'">
+          {{ showForm ? 'Cerrar' : '+ Nuevo torneo' }}
+        </button>
+      }
     </div>
 
-    <!-- Crear torneo (solo organizador) -->
-    @if (isOrganizer) {
+    <!-- Mensajes -->
+    @if (successMessage) {
+      <div class="mb-6 px-4 py-3 rounded-lg bg-green-50 border border-green-200">
+        <p class="text-green-700 text-sm">{{ successMessage }}</p>
+      </div>
+    }
+    @if (errorMessage) {
+      <div class="mb-6 px-4 py-3 rounded-lg bg-red-50 border border-red-200">
+        <p class="text-red-700 text-sm">{{ errorMessage }}</p>
+      </div>
+    }
+
+    <!-- Crear torneo (plegable) -->
+    @if (isOrganizer && showForm) {
 
       <form
         (ngSubmit)="onCreate()"
-        class="relative overflow-hidden bg-white border border-slate-200 rounded-xl shadow-sm p-6 mb-10">
+        class="relative overflow-hidden bg-white border border-slate-200 rounded-xl shadow-sm p-6 mb-8">
 
         <div class="absolute left-0 top-0 h-full w-1 rounded-l-xl" style="background:#c9a227"></div>
 
@@ -50,7 +77,7 @@
                    transition-all duration-200">
         </div>
 
-        <div class="grid sm:grid-cols-2 gap-4 mb-5">
+        <div class="grid sm:grid-cols-2 gap-4 mb-6">
           <div>
             <label class="block mb-2 text-sm font-medium text-slate-600">Fecha</label>
             <input
@@ -82,17 +109,6 @@
           </div>
         </div>
 
-        @if (successMessage) {
-          <div class="mb-5 px-4 py-3 rounded-lg bg-green-50 border border-green-200">
-            <p class="text-green-700 text-sm">{{ successMessage }}</p>
-          </div>
-        }
-        @if (errorMessage) {
-          <div class="mb-5 px-4 py-3 rounded-lg bg-red-50 border border-red-200">
-            <p class="text-red-700 text-sm">{{ errorMessage }}</p>
-          </div>
-        }
-
         <button
           type="submit"
           [disabled]="!name.trim() || !date"
@@ -106,21 +122,24 @@
 
     }
 
-    <div class="flex gap-2 mb-6">
-      @for (f of [
-        { value: 'all', label: 'Todos' },
-        { value: 'pending', label: 'Pendiente' },
-        { value: 'in_progress', label: 'En curso' },
-        { value: 'finished', label: 'Finalizado' }
-      ]; track f.value) {
+    <!-- Filtros -->
+    <div class="flex flex-wrap gap-2 mb-6">
+      @for (f of filters; track f.value) {
         <button
           type="button"
           (click)="setStatusFilter(f.value)"
-          class="text-sm px-3 py-1.5 rounded-lg border transition-colors"
+          class="flex items-center gap-2 text-sm pl-4 pr-3 py-2 rounded-full border
+                 transition-all duration-200"
           [style.background]="statusFilter === f.value ? '#0f172a' : 'white'"
-          [style.color]="statusFilter === f.value ? 'white' : '#0f172a'"
+          [style.color]="statusFilter === f.value ? 'white' : '#334155'"
           [style.borderColor]="statusFilter === f.value ? '#0f172a' : '#cbd5e1'">
           {{ f.label }}
+          <span
+            class="text-xs min-w-[1.5rem] text-center px-1.5 py-0.5 rounded-full"
+            [style.background]="statusFilter === f.value ? '#c9a227' : '#f1f5f9'"
+            [style.color]="statusFilter === f.value ? '#0f172a' : '#64748b'">
+            {{ countByStatus(f.value) }}
+          </span>
         </button>
       }
     </div>
@@ -133,10 +152,18 @@
         <p
           class="text-lg mb-1"
           style="font-family:'Cinzel',serif; font-weight:600; color:#0f172a">
-          Aún no hay torneos
+          @if (tournaments.length === 0) {
+            Aún no hay torneos
+          } @else {
+            Sin resultados
+          }
         </p>
         <p class="text-sm text-slate-500">
-          Cuando un organizador cree uno, aparecerá aquí.
+          @if (tournaments.length === 0) {
+            Cuando un organizador cree uno, aparecerá aquí.
+          } @else {
+            No hay torneos con ese estado. Prueba con otro filtro.
+          }
         </p>
       </div>
 
@@ -147,33 +174,47 @@
 
           <a
             [routerLink]="['/tournaments', t.tournamentId]"
-            class="group relative block p-6 bg-white border border-slate-200
-                   rounded-xl shadow-sm transition-all duration-200
-                   hover:-translate-y-1 hover:shadow-lg">
+            class="group relative block overflow-hidden bg-white border border-slate-200
+                   rounded-xl shadow-sm p-5 sm:p-6 transition-all duration-200
+                   hover:-translate-y-0.5 hover:shadow-md">
 
             <div
-              class="absolute left-0 top-0 h-full w-1 rounded-l-xl
-                     transition-all duration-200 group-hover:w-2"
+              class="absolute left-0 top-0 h-full w-1 transition-all duration-200 group-hover:w-2"
               style="background:#c9a227">
             </div>
 
-            <div class="flex items-center justify-between">
-              <div>
+            <div class="flex items-start justify-between gap-4">
+              <div class="min-w-0">
                 <p
-                  class="text-lg mb-1"
+                  class="text-lg truncate"
                   style="font-family:'Cinzel',serif; font-weight:600; color:#0f172a">
                   {{ t.name }}
                 </p>
-                <p class="text-sm text-slate-500">
-                  {{ t.date }} · {{ t.numPlayers }} jugadores · {{ t.status | statusLabel }}
-                </p>
+
+                <div class="mt-3 flex gap-8">
+                  <div>
+                    <p class="text-[11px] uppercase tracking-wider text-slate-400">Fecha</p>
+                    <p class="text-sm text-slate-700">{{ formatDate(t.date) }}</p>
+                  </div>
+                  <div>
+                    <p class="text-[11px] uppercase tracking-wider text-slate-400">Jugadores</p>
+                    <p class="text-sm text-slate-700">{{ t.numPlayers }}</p>
+                  </div>
+                </div>
               </div>
 
-              <span
-                class="text-2xl ml-4 transition-transform duration-200 group-hover:translate-x-1"
-                style="color:#c9a227">
-                →
-              </span>
+              <div class="flex items-center gap-3 shrink-0">
+                <span
+                  class="text-xs font-medium px-3 py-1 rounded-full"
+                  [class]="badgeClass(t.status)">
+                  {{ t.status | statusLabel }}
+                </span>
+                <span
+                  class="text-2xl transition-transform duration-200 group-hover:translate-x-1"
+                  style="color:#c9a227">
+                  →
+                </span>
+              </div>
             </div>
           </a>
 

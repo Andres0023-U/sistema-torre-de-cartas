@@ -1,31 +1,40 @@
 <div class="min-h-[calc(100vh-56px)]" style="background:#f7f4ed">
-
-  <!-- Contenedor principal -->
   <div class="max-w-5xl mx-auto px-6 py-12">
 
     <!-- Encabezado -->
-    <div class="mb-12">
-      <p
-        class="text-sm uppercase tracking-[0.25em] mb-3"
-        style="color:#b08a18">
-        {{ roleLabel }}
-      </p>
+    <div class="mb-12 flex items-center justify-between gap-6">
+      <div>
+        <span
+          class="inline-flex items-center gap-2 text-xs uppercase tracking-[0.2em]
+                 px-3 py-1.5 rounded-full mb-5"
+          style="background:#c9a22722; color:#8a6d10">
+          <span class="inline-block w-1.5 h-1.5 rounded-full" style="background:#c9a227"></span>
+          {{ roleLabel }}
+        </span>
 
-      <h1
-        class="text-4xl md:text-5xl mb-3"
-        style="font-family:'Cinzel',serif; font-weight:700; color:#0f172a">
-        @if (userName) {
-          Bienvenido, {{ userName }}
-        } @else {
-          Bienvenido
+        <h1
+          class="text-4xl md:text-5xl mb-3 leading-tight"
+          style="font-family:'Cinzel',serif; font-weight:700; color:#0f172a">
+          @if (userName) {
+            Bienvenido,<br class="md:hidden"> {{ userName }}
+          } @else {
+            Bienvenido
+          }
+        </h1>
+
+        @if (!isPending) {
+          <p class="text-slate-500 text-base">
+            Elige una opción para comenzar.
+          </p>
         }
-      </h1>
 
-      @if (!isPending) {
-        <p class="text-slate-500 text-base">
-          Elige una opción para comenzar.
-        </p>
-      }
+        <div class="mt-6 h-px w-24" style="background:#c9a227"></div>
+      </div>
+
+      <img
+        src="images/logo/logo-icon-192.png"
+        alt="S.T.C"
+        class="hidden md:block h-28 w-28 shrink-0 opacity-90">
     </div>
 
 
@@ -57,53 +66,80 @@
     } @else {
 
       <!-- Opciones principales -->
-      <div class="grid md:grid-cols-2 gap-6">
+      <div class="grid md:grid-cols-2 gap-5">
 
         @for (item of menuItems; track item.path) {
 
           <a
             [routerLink]="item.path"
-            class="group relative block p-7 bg-white border border-slate-200
-                   rounded-xl shadow-sm transition-all duration-200
-                   hover:-translate-y-1 hover:shadow-lg"
-          >
+            class="group relative flex items-center gap-5 p-6 bg-white
+                   border border-slate-200 rounded-xl shadow-sm overflow-hidden
+                   transition-all duration-200 hover:-translate-y-1 hover:shadow-lg
+                   hover:border-[#c9a227]">
 
             <!-- Línea dorada -->
             <div
-              class="absolute left-0 top-0 h-full w-1 rounded-l-xl
-                     transition-all duration-200 group-hover:w-2"
+              class="absolute left-0 top-0 h-full w-1 transition-all duration-200
+                     group-hover:w-2"
               style="background:#c9a227">
             </div>
 
+            <!-- Ícono -->
+            <div
+              class="shrink-0 w-14 h-14 rounded-full flex items-center justify-center
+                     transition-transform duration-200 group-hover:scale-105"
+              style="background:#0f172a; color:#c9a227">
 
-            <div class="flex items-start justify-between">
-
-              <div>
-
-                <p
-                  class="text-xl mb-2"
-                  style="font-family:'Cinzel',serif;
-                         font-weight:600;
-                         color:#0f172a">
-                  {{ item.title }}
-                </p>
-
-                <p class="text-sm text-slate-500 leading-relaxed">
-                  {{ item.description }}
-                </p>
-
-              </div>
-
-
-              <!-- Flecha -->
-              <span
-                class="text-2xl ml-4 transition-transform duration-200
-                       group-hover:translate-x-1"
-                style="color:#c9a227">
-                →
-              </span>
-
+              <svg
+                width="26" height="26" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="1.75"
+                stroke-linecap="round" stroke-linejoin="round">
+                @switch (item.icon) {
+                  @case ('trophy') {
+                    <path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4zM17 5h3v2a3 3 0 0 1-3 3M7 5H4v2a3 3 0 0 0 3 3"/>
+                  }
+                  @case ('ranking') {
+                    <path d="M5 21V10M12 21V4M19 21v-7"/>
+                  }
+                  @case ('deck') {
+                    <rect x="4" y="6" width="12" height="15" rx="2"/>
+                    <path d="M8 3h10a2 2 0 0 1 2 2v12"/>
+                  }
+                  @case ('stats') {
+                    <path d="M3 3v18h18"/>
+                    <path d="M7 15l4-4 3 3 5-6"/>
+                  }
+                  @case ('account') {
+                    <circle cx="12" cy="8" r="4"/>
+                    <path d="M4 21c0-4 4-6 8-6s8 2 8 6"/>
+                  }
+                  @case ('admin') {
+                    <path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6l8-3z"/>
+                    <path d="M9 12l2 2 4-4"/>
+                  }
+                }
+              </svg>
             </div>
+
+            <!-- Texto -->
+            <div class="min-w-0 flex-1">
+              <p
+                class="text-xl mb-1"
+                style="font-family:'Cinzel',serif; font-weight:600; color:#0f172a">
+                {{ item.title }}
+              </p>
+              <p class="text-sm text-slate-500 leading-relaxed">
+                {{ item.description }}
+              </p>
+            </div>
+
+            <!-- Flecha -->
+            <span
+              class="text-2xl shrink-0 transition-transform duration-200
+                     group-hover:translate-x-1"
+              style="color:#c9a227">
+              →
+            </span>
 
           </a>
 
@@ -114,18 +150,23 @@
     }
 
 
-    <!-- Separador -->
-    <div class="my-10 border-t" style="border-color:#0f172a18"></div>
+    <!-- Pie -->
+    <div class="mt-12 pt-6 border-t flex items-center justify-between"
+         style="border-color:#0f172a18">
 
+      <button
+        type="button"
+        (click)="logout()"
+        class="text-sm px-4 py-2 rounded-lg border border-slate-300 text-slate-600
+               transition-all duration-200 hover:border-red-300 hover:text-red-700
+               hover:bg-red-50">
+        Cerrar sesión
+      </button>
 
-    <!-- Cerrar sesión -->
-    <button
-      (click)="logout()"
-      class="text-sm text-slate-500 hover:text-red-700
-             transition-colors duration-200">
-      Cerrar sesión
-    </button>
+      <p class="text-xs uppercase tracking-[0.25em]" style="color:#b08a18">
+        S.T.C · Sistema de Torneos de Cartas
+      </p>
+    </div>
 
   </div>
-
 </div>
