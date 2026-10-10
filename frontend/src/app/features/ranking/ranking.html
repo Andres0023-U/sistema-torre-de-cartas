@@ -11,38 +11,94 @@
       <p class="text-slate-500 text-base">Victorias y puntos acumulados en todos los torneos.</p>
     </div>
 
-    <div class="relative overflow-hidden bg-white border border-slate-200 rounded-xl shadow-sm">
-      <div class="absolute left-0 top-0 h-full w-1 rounded-l-xl" style="background:#c9a227"></div>
+    @if (ranking.length === 0) {
 
-      <table class="w-full text-sm">
-        <thead>
-          <tr class="border-b border-slate-200 text-left text-slate-500">
-            <th class="px-6 py-3 font-medium">#</th>
-            <th class="px-6 py-3 font-medium">Jugador</th>
-            <th class="px-6 py-3 font-medium text-center">PJ</th>
-            <th class="px-6 py-3 font-medium text-center">G</th>
-            <th class="px-6 py-3 font-medium text-center">P</th>
-            <th class="px-6 py-3 font-medium text-right">Puntos</th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (e of ranking; track e.playerId) {
-            <tr class="border-b border-slate-100 last:border-0">
-              <td class="px-6 py-3" style="color:#0f172a; font-weight:600">{{ e.position }}</td>
-              <td class="px-6 py-3" style="color:#0f172a">{{ e.name }} <span class="text-slate-400">#{{ e.playerId }}</span></td>
-              <td class="px-6 py-3 text-center text-slate-600">{{ e.played }}</td>
-              <td class="px-6 py-3 text-center text-slate-600">{{ e.won }}</td>
-              <td class="px-6 py-3 text-center text-slate-600">{{ e.lost }}</td>
-              <td class="px-6 py-3 text-right font-semibold" style="color:#c9a227">{{ e.points }}</td>
-            </tr>
-          }
-        </tbody>
-      </table>
+      <div class="relative overflow-hidden bg-white border border-slate-200 rounded-xl shadow-sm p-7">
+        <div class="absolute left-0 top-0 h-full w-1 rounded-l-xl" style="background:#c9a227"></div>
+        <p class="text-slate-500 text-sm">Aún no hay resultados registrados.</p>
+      </div>
 
-      @if (ranking.length === 0) {
-        <p class="text-slate-500 text-sm p-6">Aún no hay resultados registrados.</p>
+    } @else {
+
+      <!-- Podio top 3 -->
+      <div class="grid sm:grid-cols-3 gap-4 mb-8">
+        @for (e of ranking.slice(0, 3); track e.playerId) {
+
+          <div
+            class="relative overflow-hidden bg-white border rounded-xl shadow-sm p-5 text-center"
+            [style.border-color]="e.position === 1 ? '#c9a227' : '#e2e8f0'"
+            [style.border-width]="e.position === 1 ? '2px' : '1px'"
+            [class.sm:order-2]="e.position === 1"
+            [class.sm:order-1]="e.position === 2"
+            [class.sm:order-3]="e.position === 3"
+            [class.sm:-translate-y-2]="e.position === 1">
+
+            <div
+              class="absolute left-0 top-0 h-full w-1"
+              [style.background]="e.position === 1 ? '#c9a227' : e.position === 2 ? '#94a3b8' : '#b45309'">
+            </div>
+
+            <p class="text-3xl mb-1">
+              {{ e.position === 1 ? '🥇' : e.position === 2 ? '🥈' : '🥉' }}
+            </p>
+
+            <p
+              class="text-lg leading-tight"
+              style="font-family:'Cinzel',serif; font-weight:700; color:#0f172a">
+              {{ e.name }}
+            </p>
+            <p class="text-xs text-slate-400 mb-3">#{{ e.playerId }}</p>
+
+            <p class="text-2xl font-bold" style="color:#c9a227">{{ e.points }}</p>
+            <p class="text-xs text-slate-500 mb-3">puntos</p>
+
+            <p class="text-xs text-slate-500">
+              {{ e.played }} PJ · {{ e.won }} G · {{ e.lost }} P
+            </p>
+          </div>
+
+        }
+      </div>
+
+      <!-- Resto del ranking -->
+      @if (ranking.length > 3) {
+
+        <div class="relative overflow-hidden bg-white border border-slate-200 rounded-xl shadow-sm">
+          <div class="absolute left-0 top-0 h-full w-1 rounded-l-xl" style="background:#c9a227"></div>
+
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="border-b border-slate-200 text-left text-slate-500">
+                <th class="px-6 py-3 font-medium">#</th>
+                <th class="px-6 py-3 font-medium">Jugador</th>
+                <th class="px-6 py-3 font-medium text-center">PJ</th>
+                <th class="px-6 py-3 font-medium text-center">G</th>
+                <th class="px-6 py-3 font-medium text-center">P</th>
+                <th class="px-6 py-3 font-medium text-right">Puntos</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (e of ranking.slice(3); track e.playerId; let odd = $odd) {
+                <tr
+                  class="border-b border-slate-100 last:border-0"
+                  [style.background]="odd ? '#f7f4ed' : null">
+                  <td class="px-6 py-3" style="color:#0f172a; font-weight:600">{{ e.position }}</td>
+                  <td class="px-6 py-3" style="color:#0f172a">
+                    {{ e.name }} <span class="text-slate-400">#{{ e.playerId }}</span>
+                  </td>
+                  <td class="px-6 py-3 text-center text-slate-600">{{ e.played }}</td>
+                  <td class="px-6 py-3 text-center text-slate-600">{{ e.won }}</td>
+                  <td class="px-6 py-3 text-center text-slate-600">{{ e.lost }}</td>
+                  <td class="px-6 py-3 text-right font-semibold" style="color:#c9a227">{{ e.points }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
       }
-    </div>
+
+    }
 
   </div>
 </div>
