@@ -2,6 +2,13 @@ import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../core/services/auth';
 
+interface MenuItem {
+  path: string;
+  title: string;
+  description: string;
+  icon: 'trophy' | 'ranking' | 'deck' | 'stats' | 'account' | 'admin';
+}
+
 @Component({
   selector: 'app-home',
   imports: [RouterLink],
@@ -38,47 +45,53 @@ export class Home implements OnInit {
     return localStorage.getItem('role') === 'pending';
   }
 
-  get menuItems() {
+  get menuItems(): MenuItem[] {
     const role = localStorage.getItem('role');
 
-    const tournamentsDescription =
-      role === 'organizer' || role === 'admin' ? 'Crea y gestiona tus torneos' : 'Ver torneos';
-
-    const items = [
-      { path: '/tournaments', title: 'Torneos', description: tournamentsDescription }
+    const items: MenuItem[] = [
+      {
+        path: '/tournaments',
+        title: 'Torneos',
+        description: role === 'organizer' ? 'Crea y gestiona tus torneos' : 'Consulta los torneos disponibles',
+        icon: 'trophy'
+      },
+      {
+        path: '/ranking',
+        title: 'Ranking',
+        description: 'Clasificación global de jugadores',
+        icon: 'ranking'
+      }
     ];
-
-    items.push({
-      path: '/ranking',
-      title: 'Ranking',
-      description: 'Clasificación global de jugadores'
-    });
 
     if (role === 'player') {
       items.push({
         path: '/decks',
         title: 'Mis mazos',
-        description: 'Construye y edita tus mazos de combate'
+        description: 'Construye y edita tus mazos de combate',
+        icon: 'deck'
       });
 
       items.push({
         path: '/stats',
         title: 'Mis estadísticas',
-        description: 'Tu progreso, puntos y torneos ganados'
+        description: 'Tu progreso, puntos y torneos ganados',
+        icon: 'stats'
       });
     }
 
     items.push({
       path: '/account',
       title: 'Mi cuenta',
-      description: 'Cambia tu nombre de usuario'
+      description: 'Cambia tu nombre de usuario',
+      icon: 'account'
     });
 
     if (role === 'admin') {
       items.unshift({
         path: '/admin',
         title: 'Administración',
-        description: 'Aprueba usuarios nuevos y asigna sus roles'
+        description: 'Aprueba usuarios nuevos y asigna sus roles',
+        icon: 'admin'
       });
     }
 
