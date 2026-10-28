@@ -23,7 +23,7 @@
 
 DO $seed$
 DECLARE
-    v_hash TEXT := '$2b$12$0tLzT/PZWx9YAYYSTpQamuhFyEtT0gPYK9jxpYjWy780mRYalmXMe';
+    v_hash TEXT := '__PASSWORD_HASH__';
     v_role_id INTEGER;
     v_existing_role_id INTEGER;
     v_user_id INTEGER;
