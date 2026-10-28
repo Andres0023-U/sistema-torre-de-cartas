@@ -1,7 +1,22 @@
 -- =========================================================
--- SEED: Catálogo de cartas
+-- Semilla 01: Catálogo de Cartas (01_cards.sql)
+--
+-- Propósito:
+--   Poblar el catálogo oficial de cartas disponibles en el juego Torre de Cartas (S.T.C.).
+--
+-- Datos insertados:
+--   - 18 cartas únicas en cards.card (IDs 1 al 18), incluyendo cartas de ataque,
+--     defensa y especiales de distintas raridades (común, poco común, rara, legendaria)
+--     con sus respectivos límites de copias permitidas por mazo (max_quantity).
+--
+-- Requisitos previos:
+--   - Esquema 'cards' creado mediante los scripts DDL.
+--
+-- Orden de ejecución:
+--   2º en la secuencia (00 -> 01 -> 02 -> 03 -> 04 -> 05 -> 06).
 -- =========================================================
 
+-- Esperado: 18 registros en cards.card
 INSERT INTO cards.card (card_id, card_name, value, type, effect, max_quantity, rarity, description) VALUES
 (1, 'Ataque Básico', 1, 'ataque', 'Ninguno', 4, 'común', 'Inflige 1 de daño.'),
 (2, 'Ataque Normal', 2, 'ataque', 'Ninguno', 3, 'poco común', 'Inflige 2 de daño.'),
@@ -21,3 +36,7 @@ INSERT INTO cards.card (card_id, card_name, value, type, effect, max_quantity, r
 (16, 'Reinicio Táctico', 0, 'especial', 'Cambia todas tus cartas por nuevas.', 2, 'rara', 'Borrón y cartas nuevas.'),
 (17, 'Desarme', 0, 'especial', 'El enemigo pierde una carta de su mano.', 2, 'rara', 'Deja al enemigo sin garras.'),
 (18, 'Caja de Suministros', 0, 'especial', 'Consigues dos cartas de tu mazo.', 2, 'rara', 'Asegúrate de tener tu mano con dos espacios libres antes de usarla, no quieres desperdiciar esta carta.');
+
+-- Verificación de registros insertados
+-- Esperado: 18 registros
+SELECT card_id, card_name, type, rarity, max_quantity FROM cards.card ORDER BY card_id;
