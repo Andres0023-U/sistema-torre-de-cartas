@@ -123,6 +123,34 @@ def list_registrations(
         TournamentRegistration.tournament_id == tournament_id
     ).all()
 
+@router.delete("/{tournament_id}/registrations/{player_id}", status_code=204)
+def unregister_player(
+    tournament_id: int,
+    player_id: int,
+    db: Session = Depends(get_db),
+    payload: dict = Depends(require_role(MANAGER_ROLES))
+):
+    tournament = db.query(Tournament).filter(Tournament.tournament_id == tournament_id).first()
+    if not tournament:
+        raise HTTPException(status_code=404, detail="Torneo no encontrado")
+
+    if not can_manage_tournament(payload, tournament):
+        raise HTTPException(status_code=403, detail="Solo el organizador del torneo puede desinscribir jugadores")
+
+    if tournament.status != "pending":
+        raise HTTPException(status_code=400, detail="Solo se puede desinscribir de torneos que no han iniciado")
+
+    registration = db.query(TournamentRegistration).filter(
+        TournamentRegistration.tournament_id == tournament_id,
+        TournamentRegistration.player_id == player_id
+    ).first()
+
+    if not registration:
+        raise HTTPException(status_code=404, detail="El jugador no está inscrito en este torneo")
+
+    db.delete(registration)
+    db.commit()
+
 @router.post("/{tournament_id}/start")
 def start_tournament(
     tournament_id: int,

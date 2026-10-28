@@ -22,6 +22,14 @@ export class TournamentDetail implements OnInit {
   errorMessage = '';
   successMessage = '';
 
+  // Estado de inscripción / desinscripción con spinner
+  registeringPlayerId: number | null = null;
+  unregisteringPlayerId: number | null = null;
+
+  // Paginación de jugadores disponibles
+  currentPage = 1;
+  pageSize = 5;
+
   tournamentId!: number;
 
   constructor(
@@ -42,6 +50,43 @@ export class TournamentDetail implements OnInit {
 
   get availablePlayers(): PlayerWithUser[] {
     return this.allPlayers.filter(p => !this.registeredIds.includes(p.playerId));
+  }
+
+  get paginatedAvailablePlayers(): PlayerWithUser[] {
+    const start = (this.currentPage - 1) * this.pageSize;
+    return this.availablePlayers.slice(start, start + this.pageSize);
+  }
+
+  get totalPages(): number {
+    return Math.ceil(this.availablePlayers.length / this.pageSize) || 1;
+  }
+
+  prevPage(): void {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+    }
+  }
+
+  nextPage(): void {
+    if (this.currentPage < this.totalPages) {
+      this.currentPage++;
+    }
+  }
+
+  getRoundType(roundNumber: number): string {
+    if (!this.tournament?.numPlayers) return '';
+    const totalRounds = Math.round(Math.log2(this.tournament.numPlayers));
+    const remaining = totalRounds - roundNumber + 1;
+
+    switch (remaining) {
+      case 1: return 'Final';
+      case 2: return 'Semifinal';
+      case 3: return 'Cuartos de final';
+      case 4: return 'Octavos de final';
+      case 5: return 'Dieciseisavos de final';
+      case 6: return 'Treintaydosavos de final';
+      default: return `Ronda ${roundNumber}`;
+    }
   }
 
   ngOnInit(): void {
@@ -99,13 +144,39 @@ export class TournamentDetail implements OnInit {
   onRegister(playerId: number): void {
     this.errorMessage = '';
     this.successMessage = '';
+    this.registeringPlayerId = playerId;
+
     this.tournamentService.registerPlayer(this.tournamentId, playerId).subscribe({
       next: () => {
-        this.successMessage = 'Jugador inscrito';
+        this.registeringPlayerId = null;
+        this.successMessage = 'Jugador inscrito correctamente';
+        this.loadAll();
+        if (this.currentPage > this.totalPages) {
+          this.currentPage = Math.max(1, this.totalPages);
+        }
+      },
+      error: (err) => {
+        this.registeringPlayerId = null;
+        this.errorMessage = err.error?.detail || 'No se pudo inscribir al jugador';
+        this.cdr.markForCheck();
+      }
+    });
+  }
+
+  onUnregister(playerId: number): void {
+    this.errorMessage = '';
+    this.successMessage = '';
+    this.unregisteringPlayerId = playerId;
+
+    this.tournamentService.unregisterPlayer(this.tournamentId, playerId).subscribe({
+      next: () => {
+        this.unregisteringPlayerId = null;
+        this.successMessage = 'Jugador removido del torneo';
         this.loadAll();
       },
       error: (err) => {
-        this.errorMessage = err.error?.detail || 'No se pudo inscribir al jugador';
+        this.unregisteringPlayerId = null;
+        this.errorMessage = err.error?.detail || 'No se pudo remover al jugador';
         this.cdr.markForCheck();
       }
     });

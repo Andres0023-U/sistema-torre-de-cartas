@@ -3,7 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { MatchService } from '../../../core/services/match';
 import { TournamentService } from '../../../core/services/tournament';
-import { Match, Result, Round } from '../../../models/tournament.model';
+import { Match, Result, Round, Tournament } from '../../../models/tournament.model';
 import { PlayerService } from '../../../core/services/player';
 import { DeckService } from '../../../core/services/deck';
 import { Deck } from '../../../models/deck.model';
@@ -20,10 +20,11 @@ export class RoundDetail implements OnInit {
   results: Record<number, Result> = {};
   forms: Record<number, any> = {};
   round: Round | null = null;
+  tournament: Tournament | null = null;
   errorMessage = '';
   successMessage = '';
   playerNames: Record<number, string> = {};
-    private allPlayers: TournamentPlayer[] = [];
+  private allPlayers: TournamentPlayer[] = [];
   myDecks: Deck[] = [];
   myDecksLoaded = false;
   deckTotals: Record<number, number> = {};
@@ -88,6 +89,43 @@ export class RoundDetail implements OnInit {
     return this.matches.length === 1;
   }
 
+  get completedMatchesCount(): number {
+    return this.matches.filter(m => !!this.results[m.matchId]).length;
+  }
+
+  get pendingMatchesCount(): number {
+    return this.matches.length - this.completedMatchesCount;
+  }
+
+  get matchesProgressPercentage(): number {
+    if (!this.matches.length) return 0;
+    return Math.round((this.completedMatchesCount / this.matches.length) * 100);
+  }
+
+  get roundType(): string {
+    if (!this.round || !this.tournament?.numPlayers) return this.round?.name || '';
+    const totalRounds = Math.round(Math.log2(this.tournament.numPlayers));
+    const remaining = totalRounds - this.round.number + 1;
+
+    switch (remaining) {
+      case 1: return 'Final';
+      case 2: return 'Semifinal';
+      case 3: return 'Cuartos de final';
+      case 4: return 'Octavos de final';
+      case 5: return 'Dieciseisavos de final';
+      case 6: return 'Treintaydosavos de final';
+      default: return this.round.name;
+    }
+  }
+
+  get roundDisplayTitle(): string {
+    if (!this.round) return '';
+    const type = this.roundType;
+    if (!type || type === this.round.name) return this.round.name;
+    if (type === 'Final' || type === 'Semifinal') return type;
+    return `${this.round.name} (${type})`;
+  }
+
   ngOnInit(): void {
     this.route.paramMap.subscribe(params => {
       this.tournamentId = Number(params.get('id'));
@@ -96,6 +134,7 @@ export class RoundDetail implements OnInit {
       this.results = {};
       this.forms = {};
       this.round = null;
+      this.tournament = null;
       this.currentDeckId = null;
       this.selectedDeckId = null;
       this.deckDataLoaded = false;
@@ -119,6 +158,13 @@ export class RoundDetail implements OnInit {
   }
 
   load(): void {
+    this.tournamentService.getTournaments().subscribe({
+      next: (list) => {
+        this.tournament = list.find(t => t.tournamentId === this.tournamentId) ?? null;
+        this.cdr.markForCheck();
+      }
+    });
+
     this.tournamentService.getRounds(this.tournamentId).subscribe({
       next: (rounds) => {
         this.round = rounds.find(r => r.roundId === this.roundId) ?? null;
@@ -168,7 +214,7 @@ export class RoundDetail implements OnInit {
     this.successMessage = '';
     this.matchService.generateMatches(this.roundId).subscribe({
       next: () => {
-        this.successMessage = 'Emparejamientos generados';
+        this.successMessage = 'Emparejamientos generados correctamente';
         this.load();
       },
       error: (err) => {
@@ -189,7 +235,7 @@ export class RoundDetail implements OnInit {
       player2FinalLife: Number(form.player2FinalLife)
     }).subscribe({
       next: () => {
-        this.successMessage = 'Resultado registrado';
+        this.successMessage = 'Resultado registrado correctamente';
         this.load();
       },
       error: (err) => {
@@ -212,7 +258,7 @@ export class RoundDetail implements OnInit {
         }
       },
       error: (err) => {
-        this.errorMessage = err.error?.detail || 'No se pudo avanzar de ronda';
+        this.errorMessage = err.error?.detail || 'No se pudo avanzar de fase';
         this.cdr.markForCheck();
       }
     });
@@ -278,7 +324,7 @@ export class RoundDetail implements OnInit {
     this.tournamentService.selectDeck(this.roundId, this.selectedDeckId).subscribe({
       next: () => {
         this.currentDeckId = this.selectedDeckId;
-        this.successMessage = 'Mazo guardado para esta ronda';
+        this.successMessage = 'Mazo guardado para esta fase';
         this.savingDeck = false;
         this.cdr.markForCheck();
       },

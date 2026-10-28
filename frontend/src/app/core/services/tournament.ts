@@ -56,6 +56,10 @@ export class TournamentService {
     return this.http.post(`${this.apiUrl}/${tournamentId}/registrations`, { player_id: playerId });
   }
 
+  unregisterPlayer(tournamentId: number, playerId: number): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/${tournamentId}/registrations/${playerId}`);
+  }
+
   startTournament(tournamentId: number): Observable<any> {
     return this.http.post<any>(`${this.apiUrl}/${tournamentId}/start`, {});
   }

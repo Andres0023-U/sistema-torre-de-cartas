@@ -1,8 +1,8 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { Router, RouterLink } from '@angular/router';
 import { TournamentService } from '../../../core/services/tournament';
 import { Tournament } from '../../../models/tournament.model';
-import { RouterLink } from '@angular/router';
 import { StatusLabelPipe } from '../../../shared/pipes/status-label';
 
 @Component({
@@ -21,6 +21,7 @@ export class TournamentList implements OnInit {
 
   constructor(
     private tournamentService: TournamentService,
+    private router: Router,
     private cdr: ChangeDetectorRef
   ) {}
 
@@ -57,12 +58,8 @@ export class TournamentList implements OnInit {
       format: 'single_elimination',
       numPlayers: this.numPlayers
     }).subscribe({
-      next: () => {
-        this.successMessage = 'Torneo creado correctamente';
-        this.name = '';
-        this.date = '';
-        this.loadTournaments();
-        this.cdr.markForCheck();
+      next: (created) => {
+        this.router.navigate(['/tournaments', created.tournamentId]);
       },
       error: (err) => {
         this.errorMessage = err.status === 403
