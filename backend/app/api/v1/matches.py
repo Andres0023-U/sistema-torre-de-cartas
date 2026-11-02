@@ -109,6 +109,7 @@ def create_result(
         player1_points=winner_points if winner_is_p1 else 0,
         player2_points=0 if winner_is_p1 else winner_points,
         date=data.date or datetime.now(timezone.utc),
+        duration_minutes=data.duration_minutes,
     )
     db.add(result)
     db.commit()

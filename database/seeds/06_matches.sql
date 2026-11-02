@@ -71,8 +71,8 @@ BEGIN
             VALUES (v_r_id, v_d1_id, v_d2_id)
             RETURNING match_id INTO v_m_id;
 
-            INSERT INTO matches.result (match_id, winner_id, end_phase, player1_final_life, player2_final_life, player1_points, player2_points, date)
-            VALUES (v_m_id, v_d1_id, 'normal', 15, 0, 3, 0, '2025-01-15 10:00:00+00');
+            INSERT INTO matches.result (match_id, winner_id, end_phase, player1_final_life, player2_final_life, player1_points, player2_points, duration_minutes, date)
+            VALUES (v_m_id, v_d1_id, 'normal', 20, 0, 3, 0, 15, '2025-01-15 10:00:00+00');
         END LOOP;
 
         -- --- RONDA 2 (16 ganadores -> 8 partidas) ---
@@ -102,8 +102,8 @@ BEGIN
             VALUES (v_r_id, v_d1_id, v_d2_id)
             RETURNING match_id INTO v_m_id;
 
-            INSERT INTO matches.result (match_id, winner_id, end_phase, player1_final_life, player2_final_life, player1_points, player2_points, date)
-            VALUES (v_m_id, v_d1_id, 'normal', 12, 0, 3, 0, '2025-01-15 12:00:00+00');
+            INSERT INTO matches.result (match_id, winner_id, end_phase, player1_final_life, player2_final_life, player1_points, player2_points, duration_minutes, date)
+            VALUES (v_m_id, v_d1_id, 'normal', 12, 0, 3, 0, 20, '2025-01-15 12:00:00+00');
         END LOOP;
 
         -- --- RONDA 3 (8 ganadores -> 4 partidas) ---
@@ -132,8 +132,8 @@ BEGIN
             VALUES (v_r_id, v_d1_id, v_d2_id)
             RETURNING match_id INTO v_m_id;
 
-            INSERT INTO matches.result (match_id, winner_id, end_phase, player1_final_life, player2_final_life, player1_points, player2_points, date)
-            VALUES (v_m_id, v_d1_id, 'normal', 10, 0, 3, 0, '2025-01-15 14:00:00+00');
+            INSERT INTO matches.result (match_id, winner_id, end_phase, player1_final_life, player2_final_life, player1_points, player2_points, duration_minutes, date)
+            VALUES (v_m_id, v_d1_id, 'normal', 10, 0, 3, 0, 25, '2025-01-15 14:00:00+00');
         END LOOP;
 
         -- --- RONDA 4 (4 ganadores / Semifinal -> 2 partidas) ---
@@ -153,15 +153,15 @@ BEGIN
         SELECT d.deck_id INTO v_d1_id FROM security."user" u JOIN players.player p ON p.user_id = u.user_id JOIN players.deck d ON d.player_id = p.player_id AND d.name = 'Mazo Equilibrado' WHERE u.email = 'jugador1@demo.com';
         SELECT d.deck_id INTO v_d2_id FROM security."user" u JOIN players.player p ON p.user_id = u.user_id JOIN players.deck d ON d.player_id = p.player_id AND d.name = 'Mazo Equilibrado' WHERE u.email = 'jugador9@demo.com';
         INSERT INTO matches.match (round_id, deck1_id, deck2_id) VALUES (v_r_id, v_d1_id, v_d2_id) RETURNING match_id INTO v_m_id;
-        INSERT INTO matches.result (match_id, winner_id, end_phase, player1_final_life, player2_final_life, player1_points, player2_points, date)
-        VALUES (v_m_id, v_d1_id, 'normal', 8, 0, 3, 0, '2025-01-15 16:00:00+00');
+        INSERT INTO matches.result (match_id, winner_id, end_phase, player1_final_life, player2_final_life, player1_points, player2_points, duration_minutes, date)
+        VALUES (v_m_id, v_d1_id, 'normal', 8, 0, 3, 0, 30, '2025-01-15 16:00:00+00');
 
         -- Semifinal 2: Jugador 17 vs Jugador 25 -> Gana Jugador 17
         SELECT d.deck_id INTO v_d1_id FROM security."user" u JOIN players.player p ON p.user_id = u.user_id JOIN players.deck d ON d.player_id = p.player_id AND d.name = 'Mazo Equilibrado' WHERE u.email = 'jugador17@demo.com';
         SELECT d.deck_id INTO v_d2_id FROM security."user" u JOIN players.player p ON p.user_id = u.user_id JOIN players.deck d ON d.player_id = p.player_id AND d.name = 'Mazo Equilibrado' WHERE u.email = 'jugador25@demo.com';
         INSERT INTO matches.match (round_id, deck1_id, deck2_id) VALUES (v_r_id, v_d1_id, v_d2_id) RETURNING match_id INTO v_m_id;
-        INSERT INTO matches.result (match_id, winner_id, end_phase, player1_final_life, player2_final_life, player1_points, player2_points, date)
-        VALUES (v_m_id, v_d1_id, 'normal', 6, 0, 3, 0, '2025-01-15 16:00:00+00');
+        INSERT INTO matches.result (match_id, winner_id, end_phase, player1_final_life, player2_final_life, player1_points, player2_points, duration_minutes, date)
+        VALUES (v_m_id, v_d1_id, 'normal', 6, 0, 3, 0, 28, '2025-01-15 16:00:00+00');
 
         -- --- RONDA 5 (2 ganadores / Final -> 1 partida) ---
         INSERT INTO tournaments.round (tournament_id, number, name, status)
@@ -180,8 +180,8 @@ BEGIN
         SELECT d.deck_id INTO v_d1_id FROM security."user" u JOIN players.player p ON p.user_id = u.user_id JOIN players.deck d ON d.player_id = p.player_id AND d.name = 'Mazo Equilibrado' WHERE u.email = 'jugador1@demo.com';
         SELECT d.deck_id INTO v_d2_id FROM security."user" u JOIN players.player p ON p.user_id = u.user_id JOIN players.deck d ON d.player_id = p.player_id AND d.name = 'Mazo Equilibrado' WHERE u.email = 'jugador17@demo.com';
         INSERT INTO matches.match (round_id, deck1_id, deck2_id) VALUES (v_r_id, v_d1_id, v_d2_id) RETURNING match_id INTO v_m_id;
-        INSERT INTO matches.result (match_id, winner_id, end_phase, player1_final_life, player2_final_life, player1_points, player2_points, date)
-        VALUES (v_m_id, v_d1_id, 'normal', 5, 0, 3, 0, '2025-01-15 18:00:00+00');
+        INSERT INTO matches.result (match_id, winner_id, end_phase, player1_final_life, player2_final_life, player1_points, player2_points, duration_minutes, date)
+        VALUES (v_m_id, v_d1_id, 'normal', 5, 0, 3, 0, 35, '2025-01-15 18:00:00+00');
 
     END IF;
 
@@ -207,15 +207,15 @@ BEGIN
         SELECT d.deck_id INTO v_d1_id FROM security."user" u JOIN players.player p ON p.user_id = u.user_id JOIN players.deck d ON d.player_id = p.player_id AND d.name = 'Mazo Defensivo' WHERE u.email = 'jugador1@demo.com';
         SELECT d.deck_id INTO v_d2_id FROM security."user" u JOIN players.player p ON p.user_id = u.user_id JOIN players.deck d ON d.player_id = p.player_id AND d.name = 'Mazo Defensivo' WHERE u.email = 'jugador2@demo.com';
         INSERT INTO matches.match (round_id, deck1_id, deck2_id) VALUES (v_r_id, v_d1_id, v_d2_id) RETURNING match_id INTO v_m_id;
-        INSERT INTO matches.result (match_id, winner_id, end_phase, player1_final_life, player2_final_life, player1_points, player2_points, date)
-        VALUES (v_m_id, v_d1_id, 'normal', 10, 0, 3, 0, '2025-01-20 10:00:00+00');
+        INSERT INTO matches.result (match_id, winner_id, end_phase, player1_final_life, player2_final_life, player1_points, player2_points, duration_minutes, date)
+        VALUES (v_m_id, v_d1_id, 'normal', 10, 0, 3, 0, 18, '2025-01-20 10:00:00+00');
 
         -- Match 2: Jugador 3 vs Jugador 4 -> Gana Jugador 3
         SELECT d.deck_id INTO v_d1_id FROM security."user" u JOIN players.player p ON p.user_id = u.user_id JOIN players.deck d ON d.player_id = p.player_id AND d.name = 'Mazo Defensivo' WHERE u.email = 'jugador3@demo.com';
         SELECT d.deck_id INTO v_d2_id FROM security."user" u JOIN players.player p ON p.user_id = u.user_id JOIN players.deck d ON d.player_id = p.player_id AND d.name = 'Mazo Defensivo' WHERE u.email = 'jugador4@demo.com';
         INSERT INTO matches.match (round_id, deck1_id, deck2_id) VALUES (v_r_id, v_d1_id, v_d2_id) RETURNING match_id INTO v_m_id;
-        INSERT INTO matches.result (match_id, winner_id, end_phase, player1_final_life, player2_final_life, player1_points, player2_points, date)
-        VALUES (v_m_id, v_d1_id, 'normal', 8, 0, 3, 0, '2025-01-20 10:00:00+00');
+        INSERT INTO matches.result (match_id, winner_id, end_phase, player1_final_life, player2_final_life, player1_points, player2_points, duration_minutes, date)
+        VALUES (v_m_id, v_d1_id, 'normal', 8, 0, 3, 0, 22, '2025-01-20 10:00:00+00');
 
         -- --- RONDA 2 (Final -> 1 partida) ---
         INSERT INTO tournaments.round (tournament_id, number, name, status)
@@ -234,8 +234,8 @@ BEGIN
         SELECT d.deck_id INTO v_d1_id FROM security."user" u JOIN players.player p ON p.user_id = u.user_id JOIN players.deck d ON d.player_id = p.player_id AND d.name = 'Mazo Defensivo' WHERE u.email = 'jugador1@demo.com';
         SELECT d.deck_id INTO v_d2_id FROM security."user" u JOIN players.player p ON p.user_id = u.user_id JOIN players.deck d ON d.player_id = p.player_id AND d.name = 'Mazo Defensivo' WHERE u.email = 'jugador3@demo.com';
         INSERT INTO matches.match (round_id, deck1_id, deck2_id) VALUES (v_r_id, v_d1_id, v_d2_id) RETURNING match_id INTO v_m_id;
-        INSERT INTO matches.result (match_id, winner_id, end_phase, player1_final_life, player2_final_life, player1_points, player2_points, date)
-        VALUES (v_m_id, v_d2_id, 'overtime', 0, 4, 0, 2, '2025-01-20 12:00:00+00');
+        INSERT INTO matches.result (match_id, winner_id, end_phase, player1_final_life, player2_final_life, player1_points, player2_points, duration_minutes, date)
+        VALUES (v_m_id, v_d2_id, 'overtime', 0, 4, 0, 2, 45, '2025-01-20 12:00:00+00');
 
     END IF;
 
@@ -263,8 +263,8 @@ BEGIN
             SELECT d.deck_id INTO v_d2_id FROM security."user" u JOIN players.player p ON p.user_id = u.user_id JOIN players.deck d ON d.player_id = p.player_id AND d.name = 'Mazo Equilibrado' WHERE u.email = 'jugador' || (2 * k + 4) || '@demo.com';
 
             INSERT INTO matches.match (round_id, deck1_id, deck2_id) VALUES (v_r_id, v_d1_id, v_d2_id) RETURNING match_id INTO v_m_id;
-            INSERT INTO matches.result (match_id, winner_id, end_phase, player1_final_life, player2_final_life, player1_points, player2_points, date)
-            VALUES (v_m_id, v_d1_id, 'normal', 10, 0, 3, 0, '2025-02-01 10:00:00+00');
+            INSERT INTO matches.result (match_id, winner_id, end_phase, player1_final_life, player2_final_life, player1_points, player2_points, duration_minutes, date)
+            VALUES (v_m_id, v_d1_id, 'normal', 10, 0, 3, 0, 24, '2025-02-01 10:00:00+00');
         END LOOP;
 
         -- --- RONDA 2 / Semifinal (4 ganadores: J5, J7, J9, J11 -> En Curso) ---
@@ -284,8 +284,8 @@ BEGIN
         SELECT d.deck_id INTO v_d1_id FROM security."user" u JOIN players.player p ON p.user_id = u.user_id JOIN players.deck d ON d.player_id = p.player_id AND d.name = 'Mazo Equilibrado' WHERE u.email = 'jugador5@demo.com';
         SELECT d.deck_id INTO v_d2_id FROM security."user" u JOIN players.player p ON p.user_id = u.user_id JOIN players.deck d ON d.player_id = p.player_id AND d.name = 'Mazo Equilibrado' WHERE u.email = 'jugador7@demo.com';
         INSERT INTO matches.match (round_id, deck1_id, deck2_id) VALUES (v_r_id, v_d1_id, v_d2_id) RETURNING match_id INTO v_m_id;
-        INSERT INTO matches.result (match_id, winner_id, end_phase, player1_final_life, player2_final_life, player1_points, player2_points, date)
-        VALUES (v_m_id, v_d1_id, 'normal', 7, 0, 3, 0, '2025-02-01 12:00:00+00');
+        INSERT INTO matches.result (match_id, winner_id, end_phase, player1_final_life, player2_final_life, player1_points, player2_points, duration_minutes, date)
+        VALUES (v_m_id, v_d1_id, 'normal', 7, 0, 3, 0, 26, '2025-02-01 12:00:00+00');
 
         -- Match 2: J9 vs J11 -> CREADO SIN RESULTADO (Pendiente de jugar/cargar en UI)
         SELECT d.deck_id INTO v_d1_id FROM security."user" u JOIN players.player p ON p.user_id = u.user_id JOIN players.deck d ON d.player_id = p.player_id AND d.name = 'Mazo Equilibrado' WHERE u.email = 'jugador9@demo.com';

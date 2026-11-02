@@ -25,6 +25,9 @@ class HistoryEntry(BaseModel):
     points: int
     end_phase: str
     date: datetime
+    duration_minutes: int | None = None
+    final_life: int | None = None
+    total_rounds: int | None = None
 
 
 @router.get("/me/history", response_model=list[HistoryEntry])
@@ -68,12 +71,15 @@ def my_history(
         ):
             opponents[deck.deck_id] = (owner.player_id, user.name)
 
+    import math
     history = []
     for match, result, rnd, tournament in rows:
         is_p1 = match.deck1_id in my_deck_ids
         my_deck = match.deck1_id if is_p1 else match.deck2_id
         opponent_deck = match.deck2_id if is_p1 else match.deck1_id
         opponent_id, opponent_name = opponents.get(opponent_deck, (None, None))
+        my_final_life = result.player1_final_life if is_p1 else result.player2_final_life
+        total_rounds = max(1, math.ceil(math.log2(tournament.num_players))) if tournament.num_players > 1 else 1
 
         history.append(HistoryEntry(
             match_id=match.match_id,
@@ -87,6 +93,9 @@ def my_history(
             points=result.player1_points if is_p1 else result.player2_points,
             end_phase=result.end_phase,
             date=result.date,
+            duration_minutes=result.duration_minutes,
+            final_life=my_final_life,
+            total_rounds=total_rounds,
         ))
 
     return history

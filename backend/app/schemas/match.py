@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from datetime import datetime
 from typing import Optional
 
@@ -21,6 +21,7 @@ class ResultCreate(BaseModel):
     end_phase: str           # 'normal' u 'overtime'
     player1_final_life: int
     player2_final_life: int
+    duration_minutes: Optional[int] = Field(None, ge=1, le=600)
     date: Optional[datetime] = None
 
 class ResultResponse(BaseModel):
@@ -33,6 +34,7 @@ class ResultResponse(BaseModel):
     player1_points: int
     player2_points: int
     date: datetime
+    duration_minutes: Optional[int] = None
 
     class Config:
         from_attributes = True

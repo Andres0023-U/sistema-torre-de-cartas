@@ -226,6 +226,7 @@ CREATE TABLE matches.result (
     player2_final_life INTEGER NOT NULL,
     player1_points INTEGER NOT NULL,
     player2_points INTEGER NOT NULL,
+    duration_minutes INTEGER CHECK (duration_minutes > 0 AND duration_minutes <= 600),
     date TIMESTAMPTZ NOT NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 

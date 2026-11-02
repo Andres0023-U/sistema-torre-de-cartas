@@ -17,7 +17,13 @@ class Match(Base):
 
 class Result(Base):
     __tablename__ = "result"
-    __table_args__ = {"schema": "matches"}
+    __table_args__ = (
+        CheckConstraint(
+            "duration_minutes > 0 AND duration_minutes <= 600",
+            name="chk_result_duration_minutes",
+        ),
+        {"schema": "matches"},
+    )
 
     result_id = Column(Integer, primary_key=True)
     match_id = Column(Integer, ForeignKey("matches.match.match_id"), nullable=False, unique=True)
@@ -27,6 +33,7 @@ class Result(Base):
     player2_final_life = Column(Integer, nullable=False)
     player1_points = Column(Integer, nullable=False)
     player2_points = Column(Integer, nullable=False)
+    duration_minutes = Column(Integer, nullable=True)
     date = Column(TIMESTAMP(timezone=True), nullable=False)
     created_at = Column(TIMESTAMP(timezone=True), server_default=func.now())
 

@@ -1,3 +1,4 @@
+from datetime import date
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import func
 from sqlalchemy.orm import Session
@@ -72,26 +73,86 @@ def count_registrations(db: Session, tournament_id: int) -> int:
     ).scalar()
 
 
+class OpenTournamentResponse(BaseModel):
+    tournament_id: int
+    name: str
+    date: date
+    num_players: int
+    registered_count: int
+    is_registered: bool
+
+
+@router.get("/open", response_model=list[OpenTournamentResponse])
+def list_open_tournaments(
+    db: Session = Depends(get_db),
+    payload: dict = Depends(require_role([*MANAGER_ROLES, "player"]))
+):
+    role = payload.get("role")
+    my_tournament_ids: set[int] = set()
+
+    if role == "player":
+        player = db.query(Player).filter(Player.user_id == int(payload["sub"])).first()
+        if player:
+            my_tournament_ids = {
+                r.tournament_id
+                for r in db.query(TournamentRegistration.tournament_id)
+                .filter(TournamentRegistration.player_id == player.player_id)
+                .all()
+            }
+
+    pending_tournaments = (
+        db.query(Tournament)
+        .filter(Tournament.status == "pending")
+        .order_by(Tournament.tournament_id.desc())
+        .all()
+    )
+
+    result: list[OpenTournamentResponse] = []
+    for t in pending_tournaments:
+        registered_count = count_registrations(db, t.tournament_id)
+        if registered_count < t.num_players:
+            result.append(
+                OpenTournamentResponse(
+                    tournament_id=t.tournament_id,
+                    name=t.name,
+                    date=t.date,
+                    num_players=t.num_players,
+                    registered_count=registered_count,
+                    is_registered=(t.tournament_id in my_tournament_ids) if role == "player" else False,
+                )
+            )
+    return result
+
+
 @router.post("/{tournament_id}/registrations", response_model=RegistrationResponse)
 def register_player(
     tournament_id: int,
-    data: RegistrationCreate,
+    data: RegistrationCreate | None = None,
     db: Session = Depends(get_db),
-    payload: dict = Depends(require_role(MANAGER_ROLES))
+    payload: dict = Depends(require_role([*MANAGER_ROLES, "player"]))
 ):
     tournament = db.query(Tournament).filter(Tournament.tournament_id == tournament_id).first()
     if not tournament:
         raise HTTPException(status_code=404, detail="Torneo no encontrado")
 
-    if not can_manage_tournament(payload, tournament):
-        raise HTTPException(status_code=403, detail="Solo el organizador del torneo puede inscribir jugadores")
+    if payload.get("role") == "player":
+        player = db.query(Player).filter(Player.user_id == int(payload["sub"])).first()
+        if not player:
+            raise HTTPException(status_code=404, detail="No tienes perfil de jugador")
+        target_player_id = player.player_id
+    else:
+        if not can_manage_tournament(payload, tournament):
+            raise HTTPException(status_code=403, detail="Solo el organizador del torneo puede inscribir jugadores")
+        if not data or data.player_id is None:
+            raise HTTPException(status_code=400, detail="Debes indicar el player_id")
+        target_player_id = data.player_id
 
     if tournament.status != "pending":
         raise HTTPException(status_code=400, detail="Solo se puede inscribir en torneos que no han iniciado")
 
     already = db.query(TournamentRegistration).filter(
         TournamentRegistration.tournament_id == tournament_id,
-        TournamentRegistration.player_id == data.player_id
+        TournamentRegistration.player_id == target_player_id
     ).first()
     if already:
         raise HTTPException(status_code=400, detail="El jugador ya está inscrito en este torneo")
@@ -105,7 +166,7 @@ def register_player(
 
     registration = TournamentRegistration(
         tournament_id=tournament_id,
-        player_id=data.player_id
+        player_id=target_player_id
     )
     db.add(registration)
     db.commit()
@@ -128,13 +189,17 @@ def unregister_player(
     tournament_id: int,
     player_id: int,
     db: Session = Depends(get_db),
-    payload: dict = Depends(require_role(MANAGER_ROLES))
+    payload: dict = Depends(require_role([*MANAGER_ROLES, "player"]))
 ):
     tournament = db.query(Tournament).filter(Tournament.tournament_id == tournament_id).first()
     if not tournament:
         raise HTTPException(status_code=404, detail="Torneo no encontrado")
 
-    if not can_manage_tournament(payload, tournament):
+    if payload.get("role") == "player":
+        player = db.query(Player).filter(Player.user_id == int(payload["sub"])).first()
+        if not player or player.player_id != player_id:
+            raise HTTPException(status_code=403, detail="Solo puedes cancelar tu propia inscripción")
+    elif not can_manage_tournament(payload, tournament):
         raise HTTPException(status_code=403, detail="Solo el organizador del torneo puede desinscribir jugadores")
 
     if tournament.status != "pending":

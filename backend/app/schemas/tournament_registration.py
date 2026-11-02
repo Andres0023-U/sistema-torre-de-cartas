@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 
 class RegistrationCreate(BaseModel):
-    player_id: int
+    player_id: int | None = None
 
 class RegistrationResponse(BaseModel):
     tournament_registration_id: int

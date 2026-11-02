@@ -177,6 +177,9 @@ def update_my_password(
     if not user:
         raise HTTPException(status_code=404, detail="Usuario no encontrado")
 
+    if not user.is_active:
+        raise HTTPException(status_code=403, detail="Tu cuenta está desactivada. Contacta a un administrador.")
+
     if not verify_password(data.current_password, user.password_hash):
         raise HTTPException(status_code=400, detail="La contraseña actual es incorrecta")
 

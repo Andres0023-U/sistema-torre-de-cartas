@@ -1,5 +1,6 @@
 from pydantic import BaseModel, field_validator
 from typing import Literal
+import re
 
 class AssignRoleRequest(BaseModel):
     role: Literal["organizer", "player"]
@@ -40,6 +41,10 @@ class ChangePasswordRequest(BaseModel):
     @field_validator("new_password")
     @classmethod
     def validate_new_password(cls, v: str) -> str:
-        if len(v) < 6:
-            raise ValueError("La nueva contraseña debe tener al menos 6 caracteres")
+        if len(v) < 8:
+            raise ValueError("La nueva contraseña debe tener al menos 8 caracteres")
+        if not re.search(r"[A-Za-z]", v):
+            raise ValueError("La nueva contraseña debe tener al menos una letra")
+        if not re.search(r"[0-9]", v):
+            raise ValueError("La nueva contraseña debe tener al menos un número")
         return v
