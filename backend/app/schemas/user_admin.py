@@ -32,3 +32,14 @@ class UpdateNameRequest(BaseModel):
         if len(v) > 20:
             raise ValueError("El nombre no puede superar 20 caracteres")
         return v
+
+class ChangePasswordRequest(BaseModel):
+    current_password: str
+    new_password: str
+
+    @field_validator("new_password")
+    @classmethod
+    def validate_new_password(cls, v: str) -> str:
+        if len(v) < 6:
+            raise ValueError("La nueva contraseña debe tener al menos 6 caracteres")
+        return v

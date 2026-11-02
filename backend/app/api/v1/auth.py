@@ -1,3 +1,4 @@
+from datetime import datetime, timezone
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.core.database import get_db
@@ -5,8 +6,10 @@ from app.schemas.auth import LoginRequest, TokenResponse
 from app.models.security import User, Role
 from app.core.security import verify_password, hash_password, create_access_token, get_current_user_payload, require_role
 from app.schemas.register import RegisterRequest
-from app.schemas.user_admin import AssignRoleRequest, UserAdminResponse, UserListItem, SetActiveRequest, UpdateNameRequest
+from app.schemas.user_admin import AssignRoleRequest, UserAdminResponse, UserListItem, SetActiveRequest, UpdateNameRequest, ChangePasswordRequest
 from app.models.players import Player
+from app.models.tournaments import Tournament, TournamentRegistration
+from app.models.audit import AuditLog
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -162,3 +165,99 @@ def update_my_name(
     user.name = data.name
     db.commit()
     return {"user_id": user.user_id, "name": user.name}
+
+
+@router.put("/me/password")
+def update_my_password(
+    data: ChangePasswordRequest,
+    db: Session = Depends(get_db),
+    payload: dict = Depends(get_current_user_payload)
+):
+    user = db.query(User).filter(User.user_id == int(payload["sub"])).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+
+    if not verify_password(data.current_password, user.password_hash):
+        raise HTTPException(status_code=400, detail="La contraseña actual es incorrecta")
+
+    if data.current_password == data.new_password:
+        raise HTTPException(status_code=400, detail="La nueva contraseña debe ser diferente a la actual")
+
+    user.password_hash = hash_password(data.new_password)
+    db.commit()
+    return {"detail": "Contraseña actualizada correctamente"}
+
+
+@router.delete("/me")
+def delete_my_account(
+    db: Session = Depends(get_db),
+    payload: dict = Depends(get_current_user_payload)
+):
+    user_id = int(payload["sub"])
+    user = db.query(User).filter(User.user_id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+
+    role = db.query(Role).filter(Role.role_id == user.role_id).first()
+    if role and role.name == "admin":
+        active_admins = (
+            db.query(User)
+            .filter(User.role_id == role.role_id, User.is_active.is_(True))
+            .count()
+        )
+        if active_admins <= 1:
+            raise HTTPException(
+                status_code=400,
+                detail="No se puede eliminar la cuenta del último administrador activo"
+            )
+
+    player = db.query(Player).filter(Player.user_id == user.user_id).first()
+    if player:
+        in_progress = (
+            db.query(TournamentRegistration)
+            .join(Tournament, Tournament.tournament_id == TournamentRegistration.tournament_id)
+            .filter(
+                TournamentRegistration.player_id == player.player_id,
+                Tournament.status == "in_progress"
+            )
+            .first()
+        )
+        if in_progress:
+            raise HTTPException(
+                status_code=400,
+                detail="No puedes eliminar tu cuenta mientras participas en un torneo en curso"
+            )
+
+        pending_registrations = (
+            db.query(TournamentRegistration)
+            .join(Tournament, Tournament.tournament_id == TournamentRegistration.tournament_id)
+            .filter(
+                TournamentRegistration.player_id == player.player_id,
+                Tournament.status == "pending"
+            )
+            .all()
+        )
+        for reg in pending_registrations:
+            db.delete(reg)
+
+    timestamp = int(datetime.now(timezone.utc).timestamp())
+    user.name = f"Usuario Eliminado #{user.user_id}"
+    user.email = f"deleted_{user.user_id}_{timestamp}@deleted.local"
+    user.password_hash = "!deleted"
+    user.is_active = False
+
+    db.flush()
+
+    db.query(AuditLog).filter(
+        AuditLog.table_name == "security.user",
+        AuditLog.record_id == str(user.user_id)
+    ).update(
+        {
+            AuditLog.old_values: '{"anonimizado": true}',
+            AuditLog.new_values: '{"anonimizado": true}',
+        },
+        synchronize_session=False
+    )
+
+    db.commit()
+    return {"detail": "Cuenta eliminada correctamente"}
