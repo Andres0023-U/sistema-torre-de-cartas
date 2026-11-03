@@ -105,8 +105,8 @@ def global_ranking(
     for e in entries:
         if prev_entry is None or compare(prev_entry, e) != 0:
             position += 1
-        e.pop("_last_date_raw")
-        ranking.append({"position": position, **e})
+        entry_data = {k: v for k, v in e.items() if k != "_last_date_raw"}
+        ranking.append({"position": position, **entry_data})
         prev_entry = e
 
     return {"ranking": ranking}
