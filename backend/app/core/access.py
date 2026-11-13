@@ -15,8 +15,10 @@ def require_tournament_access(db: Session, payload: dict, tournament_id: int) ->
     if role in ("organizer", "admin"):
         return tournament
 
-    # Jugador: solo si está inscrito
+    # Jugador: puede ver torneos pendientes (con vacantes abiertas) o en los que está inscrito
     if role == "player":
+        if tournament.status == "pending":
+            return tournament
         player = db.query(Player).filter(Player.user_id == int(payload["sub"])).first()
         if player:
             registered = db.query(TournamentRegistration).filter(

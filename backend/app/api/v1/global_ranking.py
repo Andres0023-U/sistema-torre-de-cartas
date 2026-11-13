@@ -21,8 +21,16 @@ def global_ranking(
         .all()
     )
 
+    if not rows:
+        return {"ranking": []}
+
+    deck_ids = {m.deck1_id for _, m in rows} | {m.deck2_id for _, m in rows} | {r.winner_id for r, _ in rows}
+    deck_to_player = {
+        d.deck_id: d.player_id
+        for d in db.query(Deck).filter(Deck.deck_id.in_(deck_ids)).all()
+    }
+
     stats: dict[int, dict] = {}
-    # head_to_head[(min_id, max_id)] = {player_id: wins}
     head_to_head: dict[tuple[int, int], dict[int, int]] = {}
 
     def ensure(player_id: int):
@@ -30,18 +38,12 @@ def global_ranking(
             stats[player_id] = {"played": 0, "won": 0, "points": 0, "last_date": None}
         return stats[player_id]
 
-    deck_to_player: dict[int, int] = {}
-
-    def get_player_id(deck_id: int) -> int:
-        if deck_id not in deck_to_player:
-            deck = db.query(Deck).filter(Deck.deck_id == deck_id).first()
-            deck_to_player[deck_id] = deck.player_id
-        return deck_to_player[deck_id]
-
     for result, match in rows:
-        p1 = get_player_id(match.deck1_id)
-        p2 = get_player_id(match.deck2_id)
-        winner_player = get_player_id(result.winner_id)
+        p1 = deck_to_player.get(match.deck1_id)
+        p2 = deck_to_player.get(match.deck2_id)
+        winner_player = deck_to_player.get(result.winner_id)
+        if p1 is None or p2 is None or winner_player is None:
+            continue
 
         for pid, points in ((p1, result.player1_points), (p2, result.player2_points)):
             s = ensure(pid)
@@ -57,13 +59,25 @@ def global_ranking(
             head_to_head[key] = {p1: 0, p2: 0}
         head_to_head[key][winner_player] += 1
 
+    player_ids = list(stats.keys())
+    players_with_users = (
+        db.query(Player, User)
+        .join(User, User.user_id == Player.user_id)
+        .filter(Player.player_id.in_(player_ids))
+        .all()
+    )
+    player_names = {p.player_id: u.name for p, u in players_with_users}
+
     entries = []
     for player_id, s in stats.items():
-        player = db.query(Player).filter(Player.player_id == player_id).first()
-        user = db.query(User).filter(User.user_id == player.user_id).first()
+        if s["played"] <= 0:
+            continue
+        name = player_names.get(player_id)
+        if not name:
+            continue
         entries.append({
             "player_id": player_id,
-            "name": user.name,
+            "name": name,
             "played": s["played"],
             "won": s["won"],
             "lost": s["played"] - s["won"],
