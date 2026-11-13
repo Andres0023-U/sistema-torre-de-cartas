@@ -115,3 +115,61 @@ BEGIN
 
 END;
 $$;
+
+
+-- =========================================================
+-- FUNCIÓN: POBLAR Y CREAR MAZO POR DEFECTO
+-- =========================================================
+
+CREATE OR REPLACE FUNCTION players.fn_populate_default_deck_cards(p_deck_id INTEGER)
+RETURNS VOID
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path TO 'players', 'cards', 'public'
+AS $$
+BEGIN
+    INSERT INTO players.deck_card (deck_id, card_id, quantity)
+    SELECT
+        p_deck_id,
+        c.card_id,
+        comp.quantity
+    FROM (
+        VALUES
+            ('Ataque Básico', 4),
+            ('Ataque Normal', 3),
+            ('Ataque Fuerte', 2),
+            ('Ataque Devastador', 1),
+            ('Defensa Básica', 4),
+            ('Defensa Normal', 3),
+            ('Defensa Fuerte', 2),
+            ('Defensa Implacable', 1)
+    ) AS comp(card_name, quantity)
+    JOIN cards.card AS c
+        ON c.card_name = comp.card_name
+    ON CONFLICT (deck_id, card_id) DO UPDATE
+        SET quantity = EXCLUDED.quantity;
+END;
+$$;
+
+
+CREATE OR REPLACE FUNCTION players.fn_create_default_deck_on_player_insert()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path TO 'players', 'cards', 'public'
+AS $$
+DECLARE
+    v_deck_id INTEGER;
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM players.deck WHERE player_id = NEW.player_id
+    ) THEN
+        INSERT INTO players.deck (player_id, name)
+        VALUES (NEW.player_id, 'Mazo por defecto')
+        RETURNING deck_id INTO v_deck_id;
+
+        PERFORM players.fn_populate_default_deck_cards(v_deck_id);
+    END IF;
+    RETURN NEW;
+END;
+$$;

@@ -30,6 +30,12 @@ FOR EACH ROW
 EXECUTE FUNCTION audit.fn_audit_log('player_id');
 
 
+CREATE TRIGGER trg_player_create_default_deck
+AFTER INSERT ON players.player
+FOR EACH ROW
+EXECUTE FUNCTION players.fn_create_default_deck_on_player_insert();
+
+
 CREATE TRIGGER trg_audit_deck
 AFTER INSERT OR UPDATE OR DELETE ON players.deck
 FOR EACH ROW

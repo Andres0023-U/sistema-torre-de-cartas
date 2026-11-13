@@ -116,6 +116,41 @@ JOIN cards.card AS c
     ON c.card_name = composition.card_name
 ON CONFLICT (deck_id, card_id) DO NOTHING;
 
+-- 4. Asegurar "Mazo por defecto" (20 cartas) para cualquier jugador sin mazos.
+INSERT INTO players.deck (player_id, name)
+SELECT
+    p.player_id,
+    'Mazo por defecto'
+FROM players.player AS p
+WHERE NOT EXISTS (
+    SELECT 1
+    FROM players.deck AS existing
+    WHERE existing.player_id = p.player_id
+);
+
+INSERT INTO players.deck_card (deck_id, card_id, quantity)
+SELECT
+    d.deck_id,
+    c.card_id,
+    composition.quantity
+FROM players.deck AS d
+JOIN (
+    VALUES
+        ('Ataque Básico', 4),
+        ('Ataque Normal', 3),
+        ('Ataque Fuerte', 2),
+        ('Ataque Devastador', 1),
+        ('Defensa Básica', 4),
+        ('Defensa Normal', 3),
+        ('Defensa Fuerte', 2),
+        ('Defensa Implacable', 1)
+) AS composition(card_name, quantity)
+    ON TRUE
+JOIN cards.card AS c
+    ON c.card_name = composition.card_name
+WHERE d.name = 'Mazo por defecto'
+ON CONFLICT (deck_id, card_id) DO NOTHING;
+
 COMMIT;
 
 -- Verificación de los mazos y sus cartas
