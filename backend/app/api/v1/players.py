@@ -47,11 +47,12 @@ def list_players(
     db: Session = Depends(get_db),
     payload: dict = Depends(require_role(["organizer", "admin"]))
 ):
+    is_admin = payload.get("role") == "admin"
     results = (
         db.query(Player, User)
         .join(User, Player.user_id == User.user_id)
         .join(Role, Role.role_id == User.role_id)
-                .filter(Role.name == "player", User.is_active.is_(True))
+        .filter(Role.name == "player", User.is_active.is_(True))
         .all()
     )
     return [
@@ -59,7 +60,7 @@ def list_players(
             player_id=player.player_id,
             user_id=player.user_id,
             name=user.name,
-            email=user.email
+            email=user.email if is_admin else ""
         )
         for player, user in results
     ]
