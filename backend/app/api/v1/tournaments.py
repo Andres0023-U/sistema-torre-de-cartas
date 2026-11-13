@@ -6,7 +6,7 @@ from app.core.database import get_db
 from app.core.security import require_role, get_current_user_payload, MANAGER_ROLES, can_manage_tournament
 from app.schemas.tournament import TournamentCreate, TournamentResponse
 from app.models.tournaments import Tournament
-from app.models.matches import Match, Result
+from app.models.matches import Match, Result, MatchDeckCard, MatchPlayerState
 from app.models.tournaments import Round, RoundDeckSelection
 from app.models.players import Deck, Player
 from app.core.access import require_tournament_access
@@ -366,3 +366,67 @@ def list_tournament_players(
         .all()
     )
     return [TournamentPlayerResponse(player_id=p.player_id, name=u.name) for p, u in rows]
+
+
+@router.post("/{tournament_id}/reset")
+def reset_tournament(
+    tournament_id: int,
+    db: Session = Depends(get_db),
+    payload: dict = Depends(require_role(["admin"]))
+):
+    tournament = db.query(Tournament).filter(Tournament.tournament_id == tournament_id).first()
+    if not tournament:
+        raise HTTPException(status_code=404, detail="Torneo no encontrado")
+
+    round_ids = [r.round_id for r in db.query(Round.round_id).filter(Round.tournament_id == tournament_id).all()]
+
+    if round_ids:
+        match_ids = [m.match_id for m in db.query(Match.match_id).filter(Match.round_id.in_(round_ids)).all()]
+        if match_ids:
+            db.query(Result).filter(Result.match_id.in_(match_ids)).delete(synchronize_session=False)
+            db.query(MatchDeckCard).filter(MatchDeckCard.match_id.in_(match_ids)).delete(synchronize_session=False)
+            db.query(MatchPlayerState).filter(MatchPlayerState.match_id.in_(match_ids)).delete(synchronize_session=False)
+            db.query(Match).filter(Match.match_id.in_(match_ids)).delete(synchronize_session=False)
+
+        db.query(RoundDeckSelection).filter(RoundDeckSelection.round_id.in_(round_ids)).delete(synchronize_session=False)
+        db.query(Round).filter(Round.round_id.in_(round_ids)).delete(synchronize_session=False)
+
+    tournament.status = "pending"
+    db.commit()
+    db.refresh(tournament)
+
+    return {
+        "detail": "Torneo reiniciado exitosamente",
+        "tournament_id": tournament.tournament_id,
+        "status": tournament.status,
+    }
+
+
+@router.delete("/{tournament_id}", status_code=204)
+def delete_tournament(
+    tournament_id: int,
+    db: Session = Depends(get_db),
+    payload: dict = Depends(require_role(["admin"]))
+):
+    tournament = db.query(Tournament).filter(Tournament.tournament_id == tournament_id).first()
+    if not tournament:
+        raise HTTPException(status_code=404, detail="Torneo no encontrado")
+
+    round_ids = [r.round_id for r in db.query(Round.round_id).filter(Round.tournament_id == tournament_id).all()]
+
+    if round_ids:
+        match_ids = [m.match_id for m in db.query(Match.match_id).filter(Match.round_id.in_(round_ids)).all()]
+        if match_ids:
+            db.query(Result).filter(Result.match_id.in_(match_ids)).delete(synchronize_session=False)
+            db.query(MatchDeckCard).filter(MatchDeckCard.match_id.in_(match_ids)).delete(synchronize_session=False)
+            db.query(MatchPlayerState).filter(MatchPlayerState.match_id.in_(match_ids)).delete(synchronize_session=False)
+            db.query(Match).filter(Match.match_id.in_(match_ids)).delete(synchronize_session=False)
+
+        db.query(RoundDeckSelection).filter(RoundDeckSelection.round_id.in_(round_ids)).delete(synchronize_session=False)
+        db.query(Round).filter(Round.round_id.in_(round_ids)).delete(synchronize_session=False)
+
+    db.query(TournamentRegistration).filter(TournamentRegistration.tournament_id == tournament_id).delete(synchronize_session=False)
+    db.delete(tournament)
+    db.commit()
+    return None
+
