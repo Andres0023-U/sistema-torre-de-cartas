@@ -12,6 +12,8 @@ class RegisterRequest(BaseModel):
         v = v.strip()
         if not v:
             raise ValueError("El nombre no puede estar vacío")
+        if not re.match(r"^[A-Za-z0-9_-]+$", v):
+            raise ValueError("El nombre de usuario solo puede contener letras, números, guiones (-) y guiones bajos (_), sin espacios")
         if len(v) > 20:
             raise ValueError("El nombre no puede tener más de 20 caracteres")
         return v

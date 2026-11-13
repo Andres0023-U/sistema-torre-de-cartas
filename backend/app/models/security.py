@@ -14,7 +14,7 @@ class User(Base):
     __table_args__ = {"schema": "security"}
 
     user_id = Column(Integer, primary_key=True)
-    name = Column(String(100), nullable=False)
+    name = Column(String(100), nullable=False, unique=True)
     email = Column(String(150), nullable=False, unique=True)
     password_hash = Column(String(255), nullable=False)
     role_id = Column(Integer, ForeignKey("security.role.role_id"), nullable=False)

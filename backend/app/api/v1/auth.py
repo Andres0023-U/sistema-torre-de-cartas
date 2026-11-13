@@ -15,7 +15,11 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 
 @router.post("/login", response_model=TokenResponse)
 def login(data: LoginRequest, db: Session = Depends(get_db)):
-    user = db.query(User).filter(User.email == data.email).first()
+    identifier = data.email.strip()
+    if "@" in identifier:
+        user = db.query(User).filter(User.email.ilike(identifier)).first()
+    else:
+        user = db.query(User).filter(User.name == identifier).first()
 
     if not user or not verify_password(data.password, user.password_hash):
         raise HTTPException(status_code=401, detail="Credenciales inválidas")
@@ -47,36 +51,31 @@ def register(data: RegisterRequest, db: Session = Depends(get_db)):
     if existing:
         raise HTTPException(status_code=400, detail="Ese correo ya está registrado")
 
-    pending_role = db.query(Role).filter(Role.name == "pending").first()
-    if not pending_role:
-        raise HTTPException(status_code=500, detail="Rol 'pending' no configurado en el sistema")
+    existing_name = db.query(User).filter(User.name == data.name).first()
+    if existing_name:
+        raise HTTPException(status_code=400, detail="Ese nombre de usuario ya está en uso")
+
+    player_role = db.query(Role).filter(Role.name == "player").first()
+    if not player_role:
+        raise HTTPException(status_code=500, detail="Rol 'player' no configurado en el sistema")
 
     new_user = User(
         name=data.name,
         email=data.email,
         password_hash=hash_password(data.password),
-        role_id=pending_role.role_id
+        role_id=player_role.role_id
     )
     db.add(new_user)
+    db.flush()
+
+    db.add(Player(user_id=new_user.user_id))
     db.commit()
     db.refresh(new_user)
 
-    token = create_access_token({"sub": str(new_user.user_id), "role": pending_role.name})
+    token = create_access_token({"sub": str(new_user.user_id), "role": player_role.name})
 
-    return TokenResponse(access_token=token, role=pending_role.name)
+    return TokenResponse(access_token=token, role=player_role.name)
 
-
-@router.get("/pending-users", response_model=list[UserAdminResponse])
-def list_pending_users(
-    db: Session = Depends(get_db),
-    payload: dict = Depends(require_role(["admin"]))
-):
-    pending_role = db.query(Role).filter(Role.name == "pending").first()
-    users = db.query(User).filter(User.role_id == pending_role.role_id).all()
-    return [
-        UserAdminResponse(user_id=u.user_id, name=u.name, email=u.email, role="pending")
-        for u in users
-    ]
 
 @router.put("/users/{user_id}/role", response_model=UserAdminResponse)
 def assign_role(
@@ -90,8 +89,8 @@ def assign_role(
         raise HTTPException(status_code=404, detail="Usuario no encontrado")
 
     current_role = db.query(Role).filter(Role.role_id == user.role_id).first()
-    if current_role.name != "pending":
-        raise HTTPException(status_code=400, detail="Solo se puede asignar rol a usuarios pendientes")
+    if current_role and current_role.name == "admin":
+        raise HTTPException(status_code=400, detail="No se puede cambiar el rol de un administrador")
 
     role = db.query(Role).filter(Role.name == data.role).first()
     if not role:
