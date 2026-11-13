@@ -2,28 +2,28 @@
 -- Semilla 00: Roles del Sistema (00_roles.sql)
 --
 -- Propósito:
---   Inserta los 4 roles base del sistema en la tabla security.role.
+--   Poblar el catálogo base de roles de seguridad del sistema Torre de Cartas (S.T.C.).
 --
 -- Datos insertados:
---   - admin: Administrador global del sistema.
---   - organizer: Organizador de torneos.
---   - player: Jugador participante.
---   - pending: Usuario registrado pendiente de asignación de rol.
+--   - 3 roles únicos en security.role:
+--       1. 'admin'     : Administrador general de la plataforma.
+--       2. 'organizer' : Organizador de torneos y gestor de rondas/partidas.
+--       3. 'player'    : Jugador participante en torneos y creador de mazos.
 --
 -- Requisitos previos:
---   - Esquema de base de datos creado mediante los scripts DDL (00_create_schemas.sql y 01_tables.sql).
+--   - Esquema 'security' y tabla 'security.role' creados mediante los scripts DDL.
 --
 -- Orden de ejecución:
 --   1º en la secuencia (00 -> 01 -> 02 -> 03 -> 04 -> 05 -> 06).
 -- =========================================================
 
--- Esperado: 4 registros en security.role
+-- Esperado: 3 registros en security.role
 INSERT INTO security.role (name) VALUES
     ('admin'),
     ('organizer'),
-    ('player'),
-    ('pending');
+    ('player')
+ON CONFLICT (name) DO NOTHING;
 
 -- Verificación de registros insertados
--- Esperado: 4 registros
+-- Esperado: 3 registros
 SELECT role_id, name FROM security.role ORDER BY role_id;
