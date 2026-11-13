@@ -60,7 +60,8 @@ def list_players(
             player_id=player.player_id,
             user_id=player.user_id,
             name=user.name,
-            email=user.email if is_admin else ""
+            email=user.email if is_admin else "",
+            avatar=user.avatar
         )
         for player, user in results
     ]

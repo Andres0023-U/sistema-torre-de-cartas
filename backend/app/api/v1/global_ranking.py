@@ -67,6 +67,7 @@ def global_ranking(
         .all()
     )
     player_names = {p.player_id: u.name for p, u in players_with_users}
+    player_avatars = {p.player_id: u.avatar for p, u in players_with_users}
 
     entries = []
     for player_id, s in stats.items():
@@ -78,6 +79,7 @@ def global_ranking(
         entries.append({
             "player_id": player_id,
             "name": name,
+            "avatar": player_avatars.get(player_id),
             "played": s["played"],
             "won": s["won"],
             "lost": s["played"] - s["won"],

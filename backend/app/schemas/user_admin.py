@@ -10,6 +10,7 @@ class UserAdminResponse(BaseModel):
     name: str
     email: str
     role: str
+    avatar: str | None = None
 
 class UserListItem(BaseModel):
     user_id: int
@@ -17,6 +18,10 @@ class UserListItem(BaseModel):
     email: str
     role: str
     is_active: bool
+    avatar: str | None = None
+
+class UpdateAvatarRequest(BaseModel):
+    avatar: str
 
 class SetActiveRequest(BaseModel):
     is_active: bool

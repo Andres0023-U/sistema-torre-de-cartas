@@ -347,6 +347,7 @@ def list_rounds(
 class TournamentPlayerResponse(BaseModel):
     player_id: int
     name: str
+    avatar: str | None = None
 
 
 @router.get("/{tournament_id}/players", response_model=list[TournamentPlayerResponse])
@@ -365,7 +366,7 @@ def list_tournament_players(
         .order_by(Player.player_id.asc())
         .all()
     )
-    return [TournamentPlayerResponse(player_id=p.player_id, name=u.name) for p, u in rows]
+    return [TournamentPlayerResponse(player_id=p.player_id, name=u.name, avatar=u.avatar) for p, u in rows]
 
 
 @router.post("/{tournament_id}/reset")

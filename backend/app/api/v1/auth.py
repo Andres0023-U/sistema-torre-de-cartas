@@ -1,3 +1,4 @@
+import base64
 from datetime import datetime, timezone
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
@@ -6,7 +7,7 @@ from app.schemas.auth import LoginRequest, TokenResponse
 from app.models.security import User, Role
 from app.core.security import verify_password, hash_password, create_access_token, get_current_user_payload, require_role
 from app.schemas.register import RegisterRequest
-from app.schemas.user_admin import AssignRoleRequest, UserAdminResponse, UserListItem, SetActiveRequest, UpdateNameRequest, ChangePasswordRequest
+from app.schemas.user_admin import AssignRoleRequest, UserAdminResponse, UserListItem, SetActiveRequest, UpdateNameRequest, ChangePasswordRequest, UpdateAvatarRequest
 from app.models.players import Player
 from app.models.tournaments import Tournament, TournamentRegistration
 from app.models.audit import AuditLog
@@ -43,7 +44,9 @@ def read_current_user(
     return {
         "user_id": payload.get("sub"),
         "role": payload.get("role"),
-        "name": user.name if user else None
+        "name": user.name if user else None,
+        "email": user.email if user else None,
+        "avatar": user.avatar if user else None,
     }
 
 @router.post("/register", response_model=TokenResponse)
@@ -130,7 +133,7 @@ def list_users(
         .all()
     )
     return [
-        UserListItem(user_id=u.user_id, name=u.name, email=u.email, role=r.name, is_active=u.is_active)
+        UserListItem(user_id=u.user_id, name=u.name, email=u.email, role=r.name, is_active=u.is_active, avatar=u.avatar)
         for u, r in rows
     ]
 
@@ -156,8 +159,23 @@ def set_user_active(
     role = db.query(Role).filter(Role.role_id == user.role_id).first()
     return UserListItem(
         user_id=user.user_id, name=user.name, email=user.email,
-        role=role.name, is_active=user.is_active
+        role=role.name, is_active=user.is_active, avatar=user.avatar
     )
+
+
+@router.put("/me/avatar")
+def update_my_avatar(
+    data: UpdateAvatarRequest,
+    db: Session = Depends(get_db),
+    payload: dict = Depends(get_current_user_payload)
+):
+    user = db.query(User).filter(User.user_id == int(payload["sub"])).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+
+    user.avatar = data.avatar
+    db.commit()
+    return {"user_id": user.user_id, "avatar": user.avatar}
 
 
 @router.put("/me/name")

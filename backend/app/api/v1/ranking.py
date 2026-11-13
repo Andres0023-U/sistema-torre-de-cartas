@@ -25,6 +25,7 @@ class RankingEntry(BaseModel):
     points: int
     life: int
     eliminated_round: int | None
+    avatar: str | None = None
 
 
 class TournamentRankingResponse(BaseModel):
@@ -51,7 +52,7 @@ def tournament_ranking(
 
     stats = {
         p.player_id: {
-            "name": u.name, "played": 0, "won": 0, "lost": 0,
+            "name": u.name, "avatar": u.avatar, "played": 0, "won": 0, "lost": 0,
             "points": 0, "life": 0, "lost_round": None
         }
         for p, u in rows
@@ -124,6 +125,7 @@ def tournament_ranking(
             points=s["points"],
             life=s["life"],
             eliminated_round=s["lost_round"],
+            avatar=s.get("avatar"),
         ))
 
     return TournamentRankingResponse(

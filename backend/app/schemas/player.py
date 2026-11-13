@@ -12,3 +12,4 @@ class PlayerWithUserResponse(BaseModel):
     user_id: int
     name: str
     email: str
+    avatar: str | None = None

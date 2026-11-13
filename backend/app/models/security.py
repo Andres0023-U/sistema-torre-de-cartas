@@ -19,6 +19,7 @@ class User(Base):
     password_hash = Column(String(255), nullable=False)
     role_id = Column(Integer, ForeignKey("security.role.role_id"), nullable=False)
     is_active = Column(Boolean, nullable=False, default=True, server_default=true())
+    avatar = Column(String, nullable=True)
     created_at = Column(TIMESTAMP(timezone=True), server_default=func.now())
     updated_at = Column(TIMESTAMP(timezone=True), server_default=func.now())
 

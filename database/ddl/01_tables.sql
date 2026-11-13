@@ -21,6 +21,7 @@ CREATE TABLE security."user" (
     password_hash VARCHAR(255) NOT NULL,
     role_id INTEGER NOT NULL,
     is_active BOOLEAN NOT NULL DEFAULT TRUE,
+    avatar TEXT,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 
