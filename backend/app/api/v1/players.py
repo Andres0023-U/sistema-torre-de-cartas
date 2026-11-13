@@ -5,6 +5,7 @@ from app.core.security import require_role
 from app.schemas.player import PlayerResponse, PlayerWithUserResponse
 from app.models.players import Player
 from app.models.security import User, Role
+from app.api.v1.decks import ensure_player_has_default_deck
 
 router = APIRouter(prefix="/players", tags=["players"])
 
@@ -22,6 +23,8 @@ def create_my_player(
 
     player = Player(user_id=user_id)
     db.add(player)
+    db.flush()
+    ensure_player_has_default_deck(player.player_id, db)
     db.commit()
     db.refresh(player)
     return player

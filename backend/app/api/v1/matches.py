@@ -10,6 +10,7 @@ from app.models.tournaments import Round, TournamentRegistration, RoundDeckSelec
 from app.models.players import Deck, DeckCard
 from app.models.tournaments import Round, Tournament, TournamentRegistration, RoundDeckSelection
 from app.core.access import require_tournament_access
+from app.api.v1.decks import ensure_player_has_default_deck
 
 router = APIRouter(prefix="/matches", tags=["matches"])
 
@@ -179,6 +180,9 @@ def generate_matches(
 
             # no eligió mazo: usar el más antiguo que cumpla las 20 cartas
             candidates = db.query(Deck).filter(Deck.player_id == reg.player_id).order_by(Deck.deck_id.asc()).all()
+            if not candidates:
+                default_deck = ensure_player_has_default_deck(reg.player_id, db)
+                candidates = [default_deck]
             chosen = None
             for d in candidates:
                 total = db.query(func.sum(DeckCard.quantity)).filter(DeckCard.deck_id == d.deck_id).scalar() or 0

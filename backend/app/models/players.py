@@ -17,7 +17,7 @@ class Deck(Base):
 
     deck_id = Column(Integer, primary_key=True)
     player_id = Column(Integer, ForeignKey("players.player.player_id"), nullable=False)
-    name = Column(String(50), nullable=False, default="Mazo")
+    name = Column(String(50), nullable=False, default="Mazo por defecto")
     created_at = Column(TIMESTAMP(timezone=True), server_default=func.now())
     updated_at = Column(TIMESTAMP(timezone=True), server_default=func.now())
 

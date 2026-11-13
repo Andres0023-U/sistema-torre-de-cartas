@@ -10,6 +10,7 @@ from app.schemas.user_admin import AssignRoleRequest, UserAdminResponse, UserLis
 from app.models.players import Player
 from app.models.tournaments import Tournament, TournamentRegistration
 from app.models.audit import AuditLog
+from app.api.v1.decks import ensure_player_has_default_deck
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -68,7 +69,10 @@ def register(data: RegisterRequest, db: Session = Depends(get_db)):
     db.add(new_user)
     db.flush()
 
-    db.add(Player(user_id=new_user.user_id))
+    new_player = Player(user_id=new_user.user_id)
+    db.add(new_player)
+    db.flush()
+    ensure_player_has_default_deck(new_player.player_id, db)
     db.commit()
     db.refresh(new_user)
 
@@ -102,7 +106,12 @@ def assign_role(
     if role.name == "player":
         has_profile = db.query(Player).filter(Player.user_id == user.user_id).first()
         if not has_profile:
-            db.add(Player(user_id=user.user_id))
+            new_player = Player(user_id=user.user_id)
+            db.add(new_player)
+            db.flush()
+            ensure_player_has_default_deck(new_player.player_id, db)
+        else:
+            ensure_player_has_default_deck(has_profile.player_id, db)
 
     db.commit()
     db.refresh(user)
